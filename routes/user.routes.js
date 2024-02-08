@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { registerUser } from '../controllers/AuthController.js';
+import { registerUser,loginUser } from '../controllers/AuthController.js';
 
 
 
@@ -14,5 +14,5 @@ router.post('/register', [
 ], registerUser);
 
 
-
+router.post('/login', loginUser);
 export default router ;
