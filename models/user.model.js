@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
+const { Schema, model } = mongoose; // Utiliser Schema et model du module mongoose
 
 
-const userSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
     {
-      firstName : { type: String, required: true},
-      lastName : { type: String, required: true},
-      email : { type: String, required: true, unique: true},
-      username : { type: String, required: true, unique: true},
-      password : { type: String, required: true},
+      firstName : { type: String, required: false},
+      lastName : { type: String, required: false},
+      email : { type: String, required: false, unique: true},
+      username : { type: String, required: false, unique: true},
+      password : { type: String, required: false},
       role : { type: String, default: "user"},
       birthDate : { type: Date},
       bio : { type: String},
@@ -18,8 +19,8 @@ const userSchema = mongoose.Schema(
       favouriteMovies : [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie"}],
       isBanned : { type: Boolean, default: false},
       isVerified : { type: Boolean, default: false},
+      
     }
     ); 
-const User = mongoose.model("User", userSchema);
 
-export default User;
+export default model("User",userSchema);

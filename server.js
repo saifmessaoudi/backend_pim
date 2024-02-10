@@ -2,28 +2,28 @@ import connectDB from "./config/connectDB.js";
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import mongoose from "mongoose";
 import cors from "cors";
-import User from "./models/user.model.js";
+import invitationRoutes from './routes/invitation.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 // Load environment variables
 dotenv.config();
 
-const app = express();
-
-
-// Connect to the database
 connectDB();
 
+const app = express();
+const port = process.env.PORT || 9090;
 
-app.use(express.json());
-app.use(morgan("dev"));
-app.use(cors());
+// Middleware
+app.use(express.json()); // Parse le corps de la requête en JSON
+app.use(morgan("dev")); // Logger les requêtes HTTP dans la console
+app.use(cors()); // Gérer les requêtes CORS
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
-}
-);
+// Routes
+app.use('/user', userRoutes);
+app.use('/invitation', invitationRoutes);
 
-
-
-
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
+});
