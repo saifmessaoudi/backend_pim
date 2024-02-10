@@ -18,6 +18,7 @@ const userSchema = mongoose.Schema(
       favouriteMovies : [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie"}],
       isBanned : { type: Boolean, default: false},
       isVerified : { type: Boolean, default: false},
+      verificationToken: { type: String, index: true, unique: true, sparse: true },
     }
     ); 
 const User = mongoose.model("User", userSchema);

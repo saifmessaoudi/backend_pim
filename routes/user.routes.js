@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { registerUser,loginUser } from '../controllers/AuthController.js';
+import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
 
 
 
@@ -12,7 +12,7 @@ router.post('/register', [
     body('email').isEmail(),
     body('password').isLength({ min: 6 })
 ], registerUser);
-
+router.get('/verify/:token', verifyEmail);
 
 router.post('/login', loginUser);
 export default router ;

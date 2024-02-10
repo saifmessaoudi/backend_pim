@@ -1,51 +1,85 @@
-import UserModel from "../models/user.model.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
-
-
-
-
-
+import UserModel from '../models/user.model.js';
+import sendEmail from '../utils/mailer.js';
+import generateVerificationToken from '../controllers/generateVerificationToken.js';
 
 export const registerUser = async (req, res) => {
     try {
-        const { username, password ,ema } = req.body;
+        const { username, password, email } = req.body;
 
-        
         const existingUser = await UserModel.findOne({ username });
-        const existing = await UserModel.findOne({email}); 
+        const existing = await UserModel.findOne({ email });
 
-        if (existingUser&&existing) {
+        if (existingUser && existing) {
             return res.status(400).json({ message: "User already exists" });
         }
 
-      
         const hashedPassword = await bcrypt.hash(password, 10);
 
-       
         const newUser = new UserModel({
-          username: req.body.username,
-          email: req.body.email,
+            username: req.body.username,
+            email: req.body.email,
             password: hashedPassword
         });
 
-        
         const user = await newUser.save();
-        
 
-        const token = jwt.sign(
+        const authToken = jwt.sign(
             { username: user.username, id: user._id },
-            process.env.JWT_KEY, 
+            process.env.JWT_KEY,
             { expiresIn: "1h" }
         );
 
-    
-        res.status(200).json({ user, token });
+        const verificationToken = generateVerificationToken();
+        newUser.verificationToken = verificationToken;
+        await newUser.save();
+
+        const verificationLink = `${process.env.BASE_URL}/verify/${verificationToken}`;
+        const emailSubject = 'Email Verification';
+        const emailHtml = `Click the following link to verify your email: <a href="${verificationLink}">Verify Email</a>`;
+        await sendEmail(newUser.email, emailSubject, emailHtml);
+
+        res.status(200).json({ user: newUser, authToken, message: 'User registered successfully. Please check your email for verification.' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const verifyEmail = async (req, res) => {
+    try {
+        const token = req.params.token;
+        console.log('Received token:', token);
+
+        // Ensure that the token is not empty or undefined
+        if (!token) {
+            return res.status(400).json({ message: 'Invalid verification token' });
+        }
+
+        const user = await UserModel.findOne({ verificationToken: token });
+        console.log('User found:', user);
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid verification token' });
+        }
+
+        // Check if the user is already verified
+        if (user.isVerified) {
+            return res.status(200).json({ message: 'Email already verified' });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = null; // Optionally clear the token after verification
+        await user.save();
+
+        res.status(200).json({ message: 'Email verification successful' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 
 
     
