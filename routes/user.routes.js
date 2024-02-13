@@ -1,7 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
-import { getAllUsers, getById, updateUser } from '../controllers/user.controller.js';
+import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
 
 const router = express.Router();
 
@@ -17,4 +17,5 @@ router.post('/login', loginUser);
 router.get("/users" , getAllUsers);
 router.put("/update/:id" , updateUser)
 router.get("/:id" , getById)
+router.put("/updatePassword/:id" , updatePassword)
 export default router ;

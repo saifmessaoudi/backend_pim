@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import usermodel from "../models/user.model.js";
+import bcrypt from 'bcrypt';
+
 
 const User = usermodel;
-
-/*----------------------------------- GET --------------------------------------- */
 
 export const getAllUsers = async (req, res) => {
     try {
@@ -34,9 +34,27 @@ export const getById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { username, firstName, lastName, email, birthDate, bio } = req.body;
+    const { username, firstName, lastName, birthDate, bio } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No user with id: ${id}`);
-    const updatedUser = { username, firstName, lastName, email, birthDate, bio };
+    const updatedUser = { username, firstName, lastName, birthDate, bio };
     await User.findByIdAndUpdate(id, updatedUser, { new: true });
     res.json(updatedUser);
+};
+
+export const updatePassword = async (req, res) => {
+    try {
+          const id = req.params.id;
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(req.body.password, salt);
+          const randomCode = req.body.randomCode;
+          const user = await User.findById(id);
+          if (!user) {
+            return res.status(400).json({ message: "User does not exist" });
+          }
+          const updatedUser = { password: hashedPassword , passwordResetToken: null};
+          await User.findOneAndUpdate({_id: id}, updatedUser); 
+          res.status(200).json({message: "Password reset successfully"});
+    }catch(error){
+      res.status(400).json(error.message);
+    }
 };
