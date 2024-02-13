@@ -43,18 +43,30 @@ export const updateUser = async (req, res) => {
 
 export const updatePassword = async (req, res) => {
     try {
-          const id = req.params.id;
-          const salt = await bcrypt.genSalt(10);
-          const hashedPassword = await bcrypt.hash(req.body.password, salt);
-          const randomCode = req.body.randomCode;
-          const user = await User.findById(id);
-          if (!user) {
+        const id = req.params.id;
+        const oldPassword = req.body.oldPassword;
+        const newPassword = req.body.newPassword;
+        
+        const user = await User.findById(id);
+        
+        if (!user) {
             return res.status(400).json({ message: "User does not exist" });
-          }
-          const updatedUser = { password: hashedPassword , passwordResetToken: null};
-          await User.findOneAndUpdate({_id: id}, updatedUser); 
-          res.status(200).json({message: "Password reset successfully"});
-    }catch(error){
-      res.status(400).json(error.message);
+        }
+        
+        // Vérifiez si l'ancien mot de passe correspond
+        const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: "Old password is incorrect" });
+        }
+
+        // Si l'ancien mot de passe est correct, mettez à jour le mot de passe
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const updatedUser = { password: hashedPassword, passwordResetToken: null };
+        await User.findOneAndUpdate({ _id: id }, updatedUser);
+        
+        res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        res.status(400).json(error.message);
     }
 };
