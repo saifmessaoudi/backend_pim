@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema(
     {
-      firstName : { type: String, required: true},
-      lastName : { type: String, required: true},
+      firstName : { type: String, required: false},
+      lastName : { type: String, required: false},
       email : { type: String, required: true, unique: true},
       username : { type: String, required: true, unique: true},
       password : { type: String, required: true},
@@ -18,6 +18,7 @@ const userSchema = mongoose.Schema(
       favouriteMovies : [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie"}],
       isBanned : { type: Boolean, default: false},
       isVerified : { type: Boolean, default: false},
+      verificationToken: { type: String, index: true, unique: true, sparse: true },
     }
     ); 
 const User = mongoose.model("User", userSchema);
