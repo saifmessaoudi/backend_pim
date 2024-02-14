@@ -2,11 +2,11 @@ import connectDB from "./config/connectDB.js";
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import mongoose from "mongoose";
 import cors from "cors";
 import router from "./routes/user.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
-
 
 // Load environment variables
 dotenv.config();
@@ -34,7 +34,5 @@ app.listen(process.env.PORT, () => {
     console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
 }
 );
-
-
 
 

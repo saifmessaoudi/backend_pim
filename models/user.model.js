@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+const { Schema, model } = mongoose; // Utiliser Schema et model du module mongoose
 
 
-const userSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
     {
       firstName : { type: String},
       lastName : { type: String},
@@ -22,6 +23,5 @@ const userSchema = mongoose.Schema(
       verificationToken: { type: String, index: true, unique: true, sparse: true },
     }
     ); 
-const User = mongoose.model("User", userSchema);
 
 export default User;

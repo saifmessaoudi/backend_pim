@@ -6,7 +6,7 @@ import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
-
+import  {getAll,addInvitation,deleteInvitation} from '../controllers/user.controller.js';
 
 const router = Router();
 
@@ -16,6 +16,7 @@ router.get('/reset-password/:token', (req, res) => {
     const token = req.params.token;
     res.render('reset-password', { token });
 });
+
 router.post("/change-password", async (req, res) => {
     const newPassword = req.body.password;
     const { token} = req.body;
@@ -58,10 +59,15 @@ router.put("/update/:id" , updateUser)
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
 
-export default router;
+  router.route('/getall')
+   .get(getAll)
+
+   router.route('/addinvitation')
+   .patch(addInvitation)
+
+   router.route('/deleteInvitation')
+   .patch(deleteInvitation)
 
 
 
-
-
-
+  export default  router;
