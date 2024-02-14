@@ -1,0 +1,45 @@
+import { Router } from "express";
+import { sendPasswordResetEmail , verifyUserWithGoogle } from "../controllers/user.controller.js";
+import bcrypt from "bcrypt";
+import User from "../models/user.model.js";
+import sendEmail from "../utils/mailer.js";
+
+
+const router = Router();
+
+router.post ('/reset-password', sendPasswordResetEmail);
+
+router.get('/reset-password/:token', (req, res) => {
+    const token = req.params.token;
+    res.render('reset-password', { token });
+});
+router.post("/change-password", async (req, res) => {
+    const newPassword = req.body.password;
+    const { token} = req.body;
+    console.log(token, newPassword);
+    try {
+        // Validate token and find user by token
+        const user = await User.findOne({ resetVerificationToken: token });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+
+    
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        user.password = hashedPassword;
+
+        await user.save();
+
+        res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+router.post('/verify-google', verifyUserWithGoogle);
+
+export default router;
