@@ -443,13 +443,11 @@ table, td { color: #000000; } #u_body a { color: #161a39; text-decoration: under
           isVerified: true,
          
         });
-        //set default password and hash it 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash("googleSignInPlaceholderPassword", salt);
         await user.save();
         const token = jwt.sign({ user: user }, process.env.JWT_SECRET, { expiresIn: "1h" });
         return res.status(200).json({ token });
-      
       }
       if (user.isBanned === true) {
         return res.status(400).json({ message: "Your account is banned ! Please contact the support." });
