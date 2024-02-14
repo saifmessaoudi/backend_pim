@@ -3,6 +3,9 @@ import { sendPasswordResetEmail , verifyUserWithGoogle } from "../controllers/us
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
+import { body } from 'express-validator';
+import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
+import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
 
 
 const router = Router();
@@ -42,4 +45,23 @@ router.post("/change-password", async (req, res) => {
 
 router.post('/verify-google', verifyUserWithGoogle);
 
+router.post('/register', [
+    body('username').notEmpty().isLength({ min: 5 }),
+    body('email').isEmail(),
+    body('password').isLength({ min: 6 })
+], registerUser);
+router.get('/verify/:token', verifyEmail);
+
+router.post('/login', loginUser);
+router.get("/users" , getAllUsers);
+router.put("/update/:id" , updateUser)
+router.get("/:id" , getById)
+router.put("/updatePassword/:id" , updatePassword)
+
 export default router;
+
+
+
+
+
+

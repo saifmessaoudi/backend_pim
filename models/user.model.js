@@ -19,6 +19,7 @@ const userSchema = mongoose.Schema(
       isBanned : { type: Boolean, default: false},
       isVerified : { type: Boolean, default: false},
       resetVerificationToken : { type: String},
+      verificationToken: { type: String, index: true, unique: true, sparse: true },
     }
     ); 
 const User = mongoose.model("User", userSchema);
