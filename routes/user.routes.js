@@ -59,7 +59,7 @@ router.put("/update/:id" , updateUser)
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
 
-  router.route('/getall')
+  router.route('/')
    .get(getAll)
 
    router.route('/addinvitation')

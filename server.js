@@ -7,6 +7,7 @@ import cors from "cors";
 import router from "./routes/user.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
+import Movie from "./models/movie.model.js";
 
 // Load environment variables
 dotenv.config();
