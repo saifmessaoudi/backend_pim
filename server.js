@@ -8,7 +8,7 @@ import router from "./routes/user.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import Movie from "./models/movie.model.js";
-
+import movieRouter from "./routes/movie.routes.js";
 // Load environment variables
 dotenv.config();
 
@@ -27,7 +27,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.static("public"));
 
-
+app.use('/movies', movieRouter);
 app.use("/user", router);
 
 
