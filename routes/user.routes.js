@@ -7,8 +7,10 @@ import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
 import  {getAll,addInvitation,deleteInvitation} from '../controllers/user.controller.js';
+import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
 const router = Router();
+const upload = imageUploadMiddleware("profilePicture",{ fileSize: 1024 * 1024 * 5 });
 
 router.post ('/reset-password', sendPasswordResetEmail);
 
@@ -52,10 +54,9 @@ router.post('/register', [
     body('password').isLength({ min: 6 })
 ], registerUser);
 router.get('/verify/:token', verifyEmail);
-
+router.put("/update/:id",upload , updateUser);
 router.post('/login', loginUser);
 router.get("/users" , getAllUsers);
-router.put("/update/:id" , updateUser)
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
 
@@ -69,5 +70,6 @@ router.put("/updatePassword/:id" , updatePassword)
    .patch(deleteInvitation)
 
 
+   
 
   export default  router;

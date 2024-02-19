@@ -491,7 +491,7 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { username, firstName, lastName, birthDate, bio } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No user with id: ${id}`);
-    const updatedUser = { username, firstName, lastName, birthDate, bio };
+    const updatedUser = { username, firstName, lastName, birthDate, bio ,profilePicture:`${req.protocol}://${req.get("host")}/img/${req.file.filename}` };
     await User.findByIdAndUpdate(id, updatedUser, { new: true });
     res.json(updatedUser);
 };
