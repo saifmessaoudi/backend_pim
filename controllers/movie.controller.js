@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-
+import Movie from '../models/movie.model.js'
 
 export const addtofavoris = async (req, res) => {
 const { username }= req.params
@@ -47,4 +47,24 @@ export const removefavoris = async (req, res) => {
       return res.status(500).json({ message: "Server error" });
     }
   };
+  export const getFavoris = async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        // Fetch detailed information for each movie using the IDs
+        const favoriteMoviesDetails = await Movie.find({ _id: { $in: user.favouriteMovies } });
+
+        // Return the list of favorite movies with details
+        return res.status(200).json({ favoriteMovies: favoriteMoviesDetails });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
   
