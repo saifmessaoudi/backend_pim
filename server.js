@@ -2,12 +2,11 @@ import connectDB from "./config/connectDB.js";
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
-import mongoose from "mongoose";
 import cors from "cors";
 import router from "./routes/user.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
-import Movie from "./models/movie.model.js";
+import movieRouter from "./routes/movie.routes.js";
 
 // Load environment variables
 dotenv.config();
@@ -29,11 +28,13 @@ app.use(express.static("public"));
 
 
 app.use("/user", router);
+app.use("/movie" ,movieRouter )
 
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
 }
 );
+
 
 
