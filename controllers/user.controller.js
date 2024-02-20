@@ -572,6 +572,72 @@ export async function addInvitation(req, res) {
     }
 }
 
+//------------------------------------//
+//accepter invitation
+export async function acceptInvitation(req,res){
+  try {
+    const { sender, recipient } = req.body;
+
+    const senderExists = await User.exists({ _id: sender });
+    const recipientExists = await User.exists({ _id: recipient });
+    if (!senderExists || !recipientExists) {
+      return res.status(404).json({ message: 'Sender or recipient does not exist' });
+  }
+  const Usersender = await User.findOne({ _id: sender }); 
+  const Userrecipient = await User.findOne({ _id: recipient });
+
+  const senderverif = Usersender.friendRequestsSent.includes(recipient);
+  const recipientverif = Userrecipient.friendRequests.includes(sender);
+  
+  if ( senderverif || recipientverif) {
+    return res.status(404).json({ message: 'the invitation is accepted' });
+}
+
+  await User.findByIdAndUpdate(recipient, { $push: { friends: sender } });
+
+  res.status(201).json({ message: 'Invitation added successfully' });
+
+  }catch(error){
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+//----------------------------------//
+
+//delete invitation
+export async function refuseInvitation(req,res){
+  try {
+    const { sender, recipient } = req.body;
+
+    const senderExists = await User.exists({ _id: sender });
+    const recipientExists = await User.exists({ _id: recipient });
+    if (!senderExists || !recipientExists) {
+      return res.status(404).json({ message: 'Sender or recipient does not exist' });
+  }
+  const Usersender = await User.findOne({ _id: sender }); 
+  const Userrecipient = await User.findOne({ _id: recipient });
+
+  const senderverif = Usersender.friendRequestsSent.includes(recipient);
+  const recipientverif = Userrecipient.friendRequests.includes(sender);
+  
+  if ( senderverif || recipientverif) {
+    return res.status(404).json({ message: 'the invitation is accepted' });
+}
+
+  await User.findByIdAndUpdate(sender, { $pop: { friendRequestsSent: recipient } });
+
+       
+  await User.findByIdAndUpdate(recipient, { $pop: { friendRequests: sender } });
+
+  res.status(201).json({ message: 'Invitation refused ' });
+
+  }catch(error){
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+///////
+
 export async function deleteInvitation(req,res){
     try{
         const { sender, recipient } = req.body;
