@@ -17,7 +17,7 @@ export  function imageUploadMiddleware (image, size) {
       },
       filename: (req, file, callback) => {
         const name = file.originalname.split(" ").join("_");
-        const extension = MIME_TYPES[file.mimetype];
+        const extension = MIME_TYPES[file.mimetype] || 'jpg';
         callback(null, name + Date.now() + "." + extension);
       },
     }),

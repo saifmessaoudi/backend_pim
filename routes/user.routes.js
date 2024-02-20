@@ -54,7 +54,7 @@ router.post('/register', [
     body('password').isLength({ min: 6 })
 ], registerUser);
 router.get('/verify/:token', verifyEmail);
-router.put("/update/:id",upload , updateUser);
+    router.put("/update/:id",upload , updateUser);
 router.post('/login', loginUser);
 router.get("/users" , getAllUsers);
 router.get("/:id" , getById)
