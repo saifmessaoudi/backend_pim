@@ -473,6 +473,8 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+
+
 export const getById = async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No user with id: ${id}`);
@@ -528,6 +530,7 @@ export const updatePassword = async (req, res) => {
 
 
 export async function getAll(req, res) {
+  
     User
     .find({})
     .then(docs => {
@@ -537,6 +540,24 @@ export async function getAll(req, res) {
         res.status(500).json({ error: err });
     });
 }
+
+
+export const getfriendsById = async (req, res) => {
+  try {
+    const { sender } = req.params ; 
+
+    const user = await User.findOne({ _id: sender }); 
+
+    if (!user) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    res.status(200).json({ friends: user.friends });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message }); 
+  }
+};
 
 export async function addInvitation(req, res) {
     try {
@@ -608,5 +629,116 @@ export async function deleteInvitation(req,res){
     }
 
 }
+
+
+export async function addMovieGenders(req, res) {
+  try {
+    const { gender, userID } = req.body;
+
+    const userExists = await User.exists({ _id: userID });
+
+    if (!userExists) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    const user = await User.findOne({ _id: userID });
+
+    for (let i = 0; i < 3; i++) {
+      if (!user.favouriteGenders[i] || user.favouriteGenders[i] !== gender) {
+        await User.findByIdAndUpdate(userID, { $push: { favouriteGenders: gender } });
+        res.status(201).json({ message: 'Gender added successfully' });
+        break;
+      }
+      else{
+        res.status(201).json({ message: 'Gender not added successfully' });
+      }
+    }
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
+export async function deleteMovieGenders(req, res) {
+  try {
+    const { gender, userID } = req.body;
+
+    const userExists = await User.exists({ _id: userID });
+
+    if (!userExists) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    const user = await User.findOne({ _id: userID });
+    const genderverif = user.favouriteGenders.includes(gender);
+
+    if ( !genderverif ) {
+      return res.status(404).json({ message: 'the gender is not already added' });
+  }
+
+  await User.findByIdAndUpdate(userID, { $pull: { favouriteGenders: gender } });
+
+
+    
+
+    res.status(201).json({ message: 'Gender deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
+
+
+
+
+/*
+export async function AcceptInvitation(req,res){
+  try{
+      const { sender, recipient } = req.body;
+      const senderExists = await User.exists({ _id: sender });
+      const recipientExists = await User.exists({ _id: recipient });
+
+      if (!senderExists || !recipientExists) {
+          return res.status(404).json({ message: 'Sender or recipient does not exist' });
+      }
+          const Usersender = await User.findOne({ _id: sender }); 
+          const Userrecipient = await User.findOne({ _id: recipient });
+
+
+          const senderverif = Usersender.friendRequestsSent.includes(recipient);
+          const recipientverif = Userrecipient.friendRequests.includes(sender);
+    
+           
+
+       if ( !senderverif || !recipientverif) {
+           return res.status(404).json({ message: 'the invitation is not already added' });
+       }
+       await User.findByIdAndUpdate(sender, { $pull: { friendRequestsSent: recipient } });
+
+     
+       await User.findByIdAndUpdate(recipient, { $pull: { friendRequests: sender } });
+
+       await User.findByIdAndUpdate(sender, { $push: { friends: recipient } });
+       await User.findByIdAndUpdate(recipient, { $push: { friends: sender } });
+
+
+
+       res.status(201).json({ message: 'Invitation is removed successfully' });
+
+
+
+  } catch(error){
+      console.error(error) ; 
+      res.status(500).json({message : "Internal server error"}) ; 
+  }
+
+}*/
+
+
 
 
