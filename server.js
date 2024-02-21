@@ -27,7 +27,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.static("public"));
 
-
+app.use('/movies', movieRouter);
 app.use("/user", router);
 app.use("/movie" ,movieRouter )
 
