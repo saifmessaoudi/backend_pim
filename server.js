@@ -24,6 +24,7 @@ connectDB();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan("dev"));
+app.use("/img", express.static("public/images"));
 app.use(cors());
 app.use(express.static("public"));
 
