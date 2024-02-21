@@ -24,12 +24,7 @@ const userSchema = new mongoose.Schema(
             enum: ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Thriller'],
         }],
         default: [],
-        validate: {
-            validator: function (value) {
-                return value.length === 3;
-            },
-            message: 'favouriteGenders must contain exactly 3 elements',
-        },
+        
     },
     
       isVerified : { type: Boolean, default: false},

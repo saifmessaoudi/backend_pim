@@ -84,51 +84,38 @@ export const removeRating = async (req, res) => {
 
 
 export const addtofavoris = async (req, res) => {
-const { username }= req.params
-const {movieId}= req.body
-try{
-    const user = await User.findOne({username})
-    if(!user){
-        return res.status(400).json({message: "user not found"})
-    }
-    if(!user.favouriteMovies.includes(movieId)){
-        user.favouriteMovies.push(movieId)
-        await user.save();
-        return res.status(200).json({message: "mivie add to favoris"})
-    }else{
-        return res.status(400).json({message: "movie exist in favoris"})
-    }
-}catch(error){
-    console.error(error)
-    return res.status(500).json({message: "erreur serveur"})
-}
-};
-export const removefavoris = async (req, res) => {
-    const { username } = req.params;
+    const userId = req.params.id;
     const { movieId } = req.body;
-  
+
     try {
-      const user = await User.findOne({ username });
-  
-      if (!user) {
-        return res.status(400).json({ message: "User not found" });
-      }
-  
-      const index = user.favouriteMovies.indexOf(movieId);
-  
-      if (index !== -1) {
-        // Retirer le film de la liste des favoris
-        user.favouriteMovies.splice(index, 1);
-        await user.save();
-        return res.status(200).json({ message: "Movie removed from favorites" });
-      } else {
-        return res.status(400).json({ message: "Movie not found in favorites" });
-      }
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        const movieIndex = user.favouriteMovies.indexOf(movieId);
+
+        if (movieIndex === -1) {
+            // Movie is not in favorites, add it
+            user.favouriteMovies.push(movieId);
+            await user.save();
+            return res.status(200).json({ message: "Movie added to favorites", action: "added" });
+        } else {
+            // Movie is in favorites, remove it
+            user.favouriteMovies.splice(movieIndex, 1);
+            await user.save();
+            return res.status(200).json({ message: "Movie removed from favorites", action: "removed" });
+        }
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Server error" });
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
     }
-  };
+};
+
+  
+
+
   export const getFavoris = async (req, res) => {
     const { username } = req.params;
 
@@ -149,4 +136,22 @@ export const removefavoris = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+
+export const checkIsFavoris = async (req, res) => {
+    const { userId } = req.params;
+    const { movieId } = req.body;
+    try {
+      const user = await User .findById(userId );
+      const isFavoris = user.favouriteMovies.includes(movieId);
+      if (isFavoris){
+        return res.status(200).json({isFavoris})
+      }
+        else{
+            return res.status(400).json(null)
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+        }
+    };
   
