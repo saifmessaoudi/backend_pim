@@ -6,7 +6,7 @@ import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
-import  {getAll,addInvitation,deleteInvitation,getfriendsById} from '../controllers/user.controller.js';
+import  {getAll,addInvitation,deleteInvitation,getfriendsById ,deleteUser} from '../controllers/user.controller.js';
 import  {addMovieGenders,deleteMovieGenders} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
@@ -79,7 +79,7 @@ router.put("/updatePassword/:id" , updatePassword)
    router.route('/deleteInvitation')
    .patch(deleteInvitation)
 
-
+   router.delete('/deleteUser/:username', deleteUser);
    
 
   export default  router;
