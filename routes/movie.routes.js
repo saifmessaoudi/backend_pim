@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addMovie } from "../controllers/movie.controller.js";
+import { addMovie ,rateMovie ,fetchUserRating,removeRating} from "../controllers/movie.controller.js";
 import { trendingMovies , listMovies, toprated } from "../controllers/movieController.js";
 
 const movieRouter = Router();
@@ -15,5 +15,10 @@ movieRouter.route('/toprated')
 
 movieRouter.route('/trendingMovies')
 .get(trendingMovies)
+
+movieRouter.post("/rateMovie/:movieId", rateMovie);
+movieRouter.post("/fetchUserRating/:movieId", fetchUserRating);
+movieRouter.post("/removeRating/:movieId", removeRating);
+
 
 export default  movieRouter;
