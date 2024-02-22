@@ -6,7 +6,7 @@ import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
-import  {getAll,addInvitation,deleteInvitation} from '../controllers/user.controller.js';
+import  {getAll,addInvitation,deleteInvitation,deleteUser} from '../controllers/user.controller.js';
 
 const router = Router();
 
@@ -58,7 +58,7 @@ router.get("/users" , getAllUsers);
 router.put("/update/:id" , updateUser)
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
-
+router.delete('/deleteUser/:username', deleteUser);
   router.route('/')
    .get(getAll)
 
