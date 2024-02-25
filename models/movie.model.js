@@ -1,3 +1,4 @@
+import { Double } from "bson";
 import mongoose from "mongoose";
 const { Schema, model } = mongoose; 
 
@@ -10,7 +11,6 @@ const movieSchema = new Schema(
         synopsis : { type: String, required: true},
         poster : { type: String, required: true},
         link : { type: String, required: true},
-        ratingtotal : { type: Number, required: true},
         genre : { type: String, required: true},
         duration : { type: Number, required: true},
         rating : [

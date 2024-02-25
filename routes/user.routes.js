@@ -6,8 +6,8 @@ import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
-import  {getAll,addInvitation,deleteInvitation,getfriendsById} from '../controllers/user.controller.js';
-import  {addMovieGenders,deleteMovieGenders} from '../controllers/user.controller.js';
+import  {getAll,addInvitation,deleteInvitation,getFriendsById,acceptInvitation} from '../controllers/user.controller.js';
+import  {addMovieGenders,deleteMovieGenders,getGendersById} from '../controllers/user.controller.js';
 
 const router = Router();
 
@@ -63,11 +63,17 @@ router.put("/updatePassword/:id" , updatePassword)
   router.route('/')
    .get(getAll)
 
+   router.route('/getgenders/:sender')
+   .get(getGendersById)
+
    router.route('/getfriends/:sender')
-   .get(getfriendsById)
+   .get(getFriendsById)
 
    router.route('/addinvitation')
    .patch(addInvitation)
+
+   router.route('/acceptinvitation')
+   .patch(acceptInvitation)
 
    router.route('/addgender')
    .patch(addMovieGenders)
