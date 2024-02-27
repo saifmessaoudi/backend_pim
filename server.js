@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cors from "cors";
 import router from "./routes/user.routes.js";
 import movierouter from "./routes/movie.routes.js";
+import planrouter from "./routes/plan.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import movieRouter from "./routes/movie.routes.js";
@@ -34,6 +35,7 @@ app.use('/movies', movieRouter);
 app.use("/user", router);
 app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
+app.use("/plans" , planrouter)
 
 
 app.listen(process.env.PORT, () => {
