@@ -13,10 +13,8 @@ import movieRouter from "./routes/movie.routes.js";
 dotenv.config();
 
 const app = express();
-app.set('view engine', 'ejs');
-app.set('views' , './public');
-
-
+app.set("view engine", "ejs");
+app.set("views", "./public");
 
 // Connect to the database
 connectDB();
@@ -28,15 +26,12 @@ app.use("/img", express.static("public/images"));
 app.use(cors());
 app.use(express.static("public"));
 
-app.use('/movies', movieRouter);
+app.use("/movies", movieRouter);
 app.use("/user", router);
-app.use("/movie" ,movieRouter )
-
+app.use("/movie", movieRouter);
 
 app.listen(process.env.PORT, () => {
-    console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
-}
-);
-
-
-
+  console.log(
+    `Server is running ${process.env.HOST} on port ${process.env.PORT}`
+  );
+});
