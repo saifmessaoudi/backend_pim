@@ -7,7 +7,7 @@ import User from "../models/user.model.js";
   export async function addRoom(req, res) {
     try {
       // Extraire les données de la requête
-      const { title, moviename, userowner, roomusers } = req.body;
+      const { title, moviename, userowner, roomusers,roomusersPending } = req.body;
   
       // Créer une nouvelle instance de Room
       const newRoom = new Room({
