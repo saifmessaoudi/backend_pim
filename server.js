@@ -5,6 +5,7 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import cors from "cors";
 import router from "./routes/user.routes.js";
+import movierouter from "./routes/movie.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import Movie from "./models/movie.model.js";
@@ -30,6 +31,7 @@ app.use(express.static("public"));
 
 
 app.use("/user", router);
+app.use("/movie", movierouter);
 
 
 app.listen(process.env.PORT, () => {
