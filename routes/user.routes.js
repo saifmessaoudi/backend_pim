@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { acceptInvitation, refuseInvitation, sendPasswordResetEmail , verifyUserWithGoogle } from "../controllers/user.controller.js";
+import { acceptInvitation, getfriendsRequest, refuseInvitation, sendPasswordResetEmail , verifyUserWithGoogle } from "../controllers/user.controller.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
@@ -85,6 +85,8 @@ router.put("/updatePassword/:id" , updatePassword)
 
    router.route('/refuseinvitation')
    .patch(refuseInvitation)
+   router.route('/getfriendsrequests/:recipient')
+   .get(getfriendsRequest) 
 
 
    router.delete('/deleteUser/:username', deleteUser);

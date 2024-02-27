@@ -664,8 +664,6 @@ export async function refuseInvitation(req, res) {
         .status(404)
         .json({ message: "Sender or recipient does not exist" });
     }
-   
-
 
     await User.findByIdAndUpdate(sender, {
       $pull: { friendRequestsSent: recipient },
@@ -681,8 +679,6 @@ export async function refuseInvitation(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-
-///////*/
 
 export async function deleteInvitation(req, res) {
   try {
@@ -779,6 +775,28 @@ export async function deleteMovieGenders(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getfriendsRequest = async (req, res) => {
+  try {
+    const { recipient } = req.params;
+    const user = await User.findById(recipient);
+    if (!user) {
+      return res.status(404).json({ message: "user does not exist" });
+    }
+    const friendRequests =  user.friendRequests;
+    const requests =[]
+    for (const friend of friendRequests) {
+      const user = await User.findById(friend);
+      if (!user) {
+        return res.status(404).json({ message: "user does not exist" });
+      }
+       requests.push(user)
+    }
+    res.status(200).json(requests);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const deleteUser = async (req, res) => {
   try {
