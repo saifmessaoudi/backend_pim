@@ -17,7 +17,10 @@ const userSchema = new mongoose.Schema(
       friendRequests : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
       friendRequestsSent : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
       favouriteMovies : [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie"}],
-      isBanned : { type: Boolean, default: false},
+      isBanned : {   type: String,
+        enum: ['BANNED', 'UNBANNED'],
+        
+    },
       favouriteGenders: {
         type: [{
             type: String,

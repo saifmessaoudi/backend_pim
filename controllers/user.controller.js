@@ -712,49 +712,67 @@ export const deleteUser = async (req, res) => {
 };
 
 
-
-/*
-export async function AcceptInvitation(req,res){
-  try{
-      const { sender, recipient } = req.body;
-      const senderExists = await User.exists({ _id: sender });
-      const recipientExists = await User.exists({ _id: recipient });
-
-      if (!senderExists || !recipientExists) {
-          return res.status(404).json({ message: 'Sender or recipient does not exist' });
-      }
-          const Usersender = await User.findOne({ _id: sender }); 
-          const Userrecipient = await User.findOne({ _id: recipient });
-
-
-          const senderverif = Usersender.friendRequestsSent.includes(recipient);
-          const recipientverif = Userrecipient.friendRequests.includes(sender);
+  export const getAllUsersAdmin = async (req, res) => {
+  try {
+    const allUsers = await User.find().select( "-createdAt -__v -updatedAt" );
     
-           
-
-       if ( !senderverif || !recipientverif) {
-           return res.status(404).json({ message: 'the invitation is not already added' });
-       }
-       await User.findByIdAndUpdate(sender, { $pull: { friendRequestsSent: recipient } });
-
-     
-       await User.findByIdAndUpdate(recipient, { $pull: { friendRequests: sender } });
-
-       await User.findByIdAndUpdate(sender, { $push: { friends: recipient } });
-       await User.findByIdAndUpdate(recipient, { $push: { friends: sender } });
-
-
-
-       res.status(201).json({ message: 'Invitation is removed successfully' });
-
-
-
-  } catch(error){
-      console.error(error) ; 
-      res.status(500).json({message : "Internal server error"}) ; 
+    res.status(200).json(allUsers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+};
 
-}*/
+export const getUserById = async (req, res) => {
+    try {
+      const userId = req.params.id;
+  
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+ export const banUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Use findByIdAndUpdate to update the 'banned' field directly
+        const user = await User.findByIdAndUpdate(userId, { isBanned: 'BANNED' }, { new: true });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error banning user: ${error.message}');
+        res.status(500).json({ error: 'Failed to ban user' });
+    }
+};
+
+export const unbanUser = async (req, res) => {
+  try {
+      const userId = req.params.id;
+
+      // Use findByIdAndUpdate to update the 'banned' field directly
+      const user = await User.findByIdAndUpdate(userId, { isBanned: 'UNBANNED' }, { new: true });
+
+      if (!user) {
+          throw new Error('User not found');
+      }
+
+      res.status(200).json(user);
+  } catch (error) {
+      console.error(`Error unbanning user: ${error.message}`);
+      res.status(500).json({ error: 'Failed to unban user' });
+  }
+};
 
 
 
