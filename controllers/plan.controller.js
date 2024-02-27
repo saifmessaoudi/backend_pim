@@ -48,11 +48,17 @@ export const updatePlan = async (req, res) => {
     }
 };
 
-// Supprimer un plan
 export const deletePlan = async (req, res) => {
-    const { id } = req.params;
     try {
-        await Plan.findByIdAndRemove(id);
+        const id = req.params.id;
+        const plan = await Plan.findById(id);
+        
+        if (!plan) {
+            return res.status(404).json({ message: 'Plan not found' });
+        }
+
+        await Plan.findOneAndDelete(id);
+        
         res.status(200).json({ message: 'Plan deleted successfully' });
     } catch (error) {
         res.status(400).json({ message: error.message });
