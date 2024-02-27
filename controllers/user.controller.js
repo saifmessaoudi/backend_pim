@@ -473,6 +473,8 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+
+
 export const getById = async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No user with id: ${id}`);
@@ -528,6 +530,7 @@ export const updatePassword = async (req, res) => {
 
 
 export async function getAll(req, res) {
+  
     User
     .find({})
     .then(docs => {
@@ -537,6 +540,24 @@ export async function getAll(req, res) {
         res.status(500).json({ error: err });
     });
 }
+
+
+export const getfriendsById = async (req, res) => {
+  try {
+    const { sender } = req.params ; 
+
+    const user = await User.findOne({ _id: sender }); 
+
+    if (!user) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    res.status(200).json({ friends: user.friends });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message }); 
+  }
+};
 
 export async function addInvitation(req, res) {
     try {
@@ -608,5 +629,151 @@ export async function deleteInvitation(req,res){
     }
 
 }
+
+
+export async function addMovieGenders(req, res) {
+  try {
+    const { gender, userID } = req.body;
+
+    const userExists = await User.exists({ _id: userID });
+
+    if (!userExists) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    const user = await User.findOne({ _id: userID });
+
+    for (let i = 0; i < 3; i++) {
+      if (!user.favouriteGenders[i] || user.favouriteGenders[i] !== gender) {
+        await User.findByIdAndUpdate(userID, { $push: { favouriteGenders: gender } });
+        res.status(201).json({ message: 'Gender added successfully' });
+        break;
+      }
+      else{
+        res.status(201).json({ message: 'Gender not added successfully' });
+      }
+    }
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
+export async function deleteMovieGenders(req, res) {
+  try {
+    const { gender, userID } = req.body;
+
+    const userExists = await User.exists({ _id: userID });
+
+    if (!userExists) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    const user = await User.findOne({ _id: userID });
+    const genderverif = user.favouriteGenders.includes(gender);
+
+    if ( !genderverif ) {
+      return res.status(404).json({ message: 'the gender is not already added' });
+  }
+
+  await User.findByIdAndUpdate(userID, { $pull: { favouriteGenders: gender } });
+
+
+    
+
+    res.status(201).json({ message: 'Gender deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
+export const deleteUser = async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    await User.findOneAndDelete({ username });
+
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error(`Error deleting user: ${error.message}`);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+};
+
+
+  export const getAllUsersAdmin = async (req, res) => {
+  try {
+    const allUsers = await User.find().select( "-createdAt -__v -updatedAt" );
+    
+    res.status(200).json(allUsers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getUserById = async (req, res) => {
+    try {
+      const userId = req.params.id;
+  
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+ export const banUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Use findByIdAndUpdate to update the 'banned' field directly
+        const user = await User.findByIdAndUpdate(userId, { isBanned: 'BANNED' }, { new: true });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error banning user: ${error.message}');
+        res.status(500).json({ error: 'Failed to ban user' });
+    }
+};
+
+export const unbanUser = async (req, res) => {
+  try {
+      const userId = req.params.id;
+
+      // Use findByIdAndUpdate to update the 'banned' field directly
+      const user = await User.findByIdAndUpdate(userId, { isBanned: 'UNBANNED' }, { new: true });
+
+      if (!user) {
+          throw new Error('User not found');
+      }
+
+      res.status(200).json(user);
+  } catch (error) {
+      console.error(`Error unbanning user: ${error.message}`);
+      res.status(500).json({ error: 'Failed to unban user' });
+  }
+};
+
+
 
 
