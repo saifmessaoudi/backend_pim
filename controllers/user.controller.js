@@ -783,14 +783,14 @@ export const getfriendsRequest = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "user does not exist" });
     }
-    const friendRequests =  user.friendRequests;
-    const requests =[]
+    const friendRequests = user.friendRequests;
+    const requests = [];
     for (const friend of friendRequests) {
       const user = await User.findById(friend);
       if (!user) {
         return res.status(404).json({ message: "user does not exist" });
       }
-       requests.push(user)
+      requests.push(user);
     }
     res.status(200).json(requests);
   } catch (error) {
@@ -817,11 +817,10 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
-  export const getAllUsersAdmin = async (req, res) => {
+export const getAllUsersAdmin = async (req, res) => {
   try {
-    const allUsers = await User.find().select( "-createdAt -__v -updatedAt" );
-    
+    const allUsers = await User.find().select("-createdAt -__v -updatedAt");
+
     res.status(200).json(allUsers);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -829,57 +828,61 @@ export const deleteUser = async (req, res) => {
 };
 
 export const getUserById = async (req, res) => {
-    try {
-      const userId = req.params.id;
-  
-      const user = await User.findById(userId);
-  
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-  
-      res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-  };
 
- export const banUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-        // Use findByIdAndUpdate to update the 'banned' field directly
-        const user = await User.findByIdAndUpdate(userId, { isBanned: 'BANNED' }, { new: true });
+export const banUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
 
-        if (!user) {
-            throw new Error('User not found');
-        }
+    // Use findByIdAndUpdate to update the 'banned' field directly
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isBanned: "BANNED" },
+      { new: true }
+    );
 
-        res.status(200).json(user);
-    } catch (error) {
-        console.error('Error banning user: ${error.message}');
-        res.status(500).json({ error: 'Failed to ban user' });
+    if (!user) {
+      throw new Error("User not found");
     }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error banning user: ${error.message}");
+    res.status(500).json({ error: "Failed to ban user" });
+  }
 };
 
 export const unbanUser = async (req, res) => {
   try {
-      const userId = req.params.id;
+    const userId = req.params.id;
 
-      // Use findByIdAndUpdate to update the 'banned' field directly
-      const user = await User.findByIdAndUpdate(userId, { isBanned: 'UNBANNED' }, { new: true });
+    // Use findByIdAndUpdate to update the 'banned' field directly
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isBanned: "UNBANNED" },
+      { new: true }
+    );
 
-      if (!user) {
-          throw new Error('User not found');
-      }
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-      res.status(200).json(user);
+    res.status(200).json(user);
   } catch (error) {
-      console.error(`Error unbanning user: ${error.message}`);
-      res.status(500).json({ error: 'Failed to unban user' });
+    console.error(`Error unbanning user: ${error.message}`);
+    res.status(500).json({ error: "Failed to unban user" });
   }
 };
-
-
-
-
