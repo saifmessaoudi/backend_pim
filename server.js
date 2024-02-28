@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import router from "./routes/user.routes.js";
-import movierouter from "./routes/movie.routes.js";
+
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import movieRouter from "./routes/movie.routes.js";
@@ -32,7 +32,6 @@ app.use("/user", router);
 app.use("/movie", movieRouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
-
 
 app.listen(process.env.PORT, () => {
   console.log(

@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 import Plan from "../models/plan.model.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import { sendSMS } from "../config/SmsService.js";
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -37,6 +38,11 @@ export const verifyPayment = async (req, res) => {
       }
       subscription.endDate = renewalDate;
       await subscription.save();
+
+      const result = sendSMS(
+        `Hey ${user.username} ! Your subscription to ${plan.title} has been done . Thanks.`
+      );
+    console.log(result);
 
       res
         .status(200)

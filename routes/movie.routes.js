@@ -1,7 +1,16 @@
 import { Router } from "express";
+
+
 import { addMovie ,rateMovie ,fetchUserRating,removeRating} from "../controllers/movie.controller.js";
 import { trendingMovies , listMovies, toprated } from "../controllers/movieController.js";
 import { addtofavoris ,getFavoris ,checkIsFavoris} from '../controllers/movie.controller.js';
+const movierouter = Router();
+
+movierouter.route('/')
+.get(listMovies)
+
+
+
 
 const movieRouter = Router();
 
