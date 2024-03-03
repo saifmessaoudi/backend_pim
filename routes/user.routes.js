@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sendPasswordResetEmail , verifyUserWithGoogle } from "../controllers/user.controller.js";
+import { banUser, getAllUsersAdmin, getUserById, sendPasswordResetEmail , unbanUser, verifyUserWithGoogle } from "../controllers/user.controller.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
@@ -9,6 +9,12 @@ import { getAllUsers, getById, updatePassword, updateUser } from '../controllers
 import  {getAll,addInvitation,deleteInvitation,getfriendsById ,deleteUser} from '../controllers/user.controller.js';
 import  {addMovieGenders,deleteMovieGenders} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
+
+
+
+
+
+
 
 const router = Router();
 const upload = imageUploadMiddleware("profilePicture",{ fileSize: 1024 * 1024 * 5 });
@@ -81,5 +87,8 @@ router.delete('/deleteUser/:username', deleteUser);
 
    router.delete('/deleteUser/:username', deleteUser);
    
-
+   router.get("/users",getAllUsersAdmin);
+   router.get('/user/:id', getUserById);
+   router.put('/ban/:id', banUser );
+   router.put('/unban/:id', unbanUser);
   export default  router;
