@@ -8,6 +8,7 @@ import movierouter from "./routes/movie.routes.js";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import movieRouter from "./routes/movie.routes.js";
+import reclamationRouter from "./routes/reclamation.routes.js";
 
 // Load environment variables
 dotenv.config();
@@ -30,7 +31,9 @@ app.use(express.static("public"));
 
 app.use('/movies', movieRouter);
 app.use("/user", router);
-app.use("/movie" ,movieRouter )
+app.use("/movie" ,movieRouter );
+app.use("/reclamation",reclamationRouter );
+
 
 
 app.listen(process.env.PORT, () => {

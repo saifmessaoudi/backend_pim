@@ -10,6 +10,7 @@ import  {getAll,addInvitation,deleteInvitation,getfriendsById ,deleteUser} from 
 import  {addMovieGenders,deleteMovieGenders} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
+
 const router = Router();
 const upload = imageUploadMiddleware("profilePicture",{ fileSize: 1024 * 1024 * 5 });
 
@@ -46,6 +47,7 @@ router.post("/change-password", async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
 
 router.post('/verify-google', verifyUserWithGoogle);
 
