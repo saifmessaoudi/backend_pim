@@ -10,6 +10,8 @@ import ejs from "ejs";
 import movieRouter from "./routes/movie.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
 import planRouter from "./routes/plan.routes.js";
+import quizRouter from "./routes/quiz.routes.js";
+
 // Load environment variables
 dotenv.config();
 
@@ -32,6 +34,7 @@ app.use("/user", router);
 app.use("/movie", movieRouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
+app.use("/quiz", quizRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(
