@@ -30,6 +30,7 @@ export const resetPassword = async (req, res) => {
     }
 }
 
+
 export const sendPasswordResetEmail = async (req, res) => {
     const { email } = req.body;
     try {
@@ -778,7 +779,35 @@ export const unbanUser = async (req, res) => {
       res.status(500).json({ error: 'Failed to unban user' });
   }
 };
+export const selectedroulette = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { gift } = req.body;
 
+    // Check if the selected gift is provided in the request body
+    if (!gift) {
+      return res.status(400).send('Selected gift is required');
+    }
 
+    const user = await User.findById(userId);
 
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
 
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (user.lastGiftSelectionDate && user.lastGiftSelectionDate > twentyFourHoursAgo) {
+      return res.status(400).send('You can only play once every 24 hours');
+    }
+
+    // Update the user's selected gift and lastGiftSelectionDate
+    user.set({ selectedgift: gift, lastGiftSelectionDate: new Date() });
+    await user.save();
+
+    console.log(`Selected gift: ${gift} for User: ${userId}`);
+    res.status(200).send('Gift received successfully');
+  } catch (error) {
+    console.error('Error selecting gift:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
