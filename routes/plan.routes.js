@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import express from 'express';
 import { createPlan, getAllPlans, getPlanById, updatePlan, deletePlan } from '../controllers/plan.controller.js';
 
@@ -20,13 +19,3 @@ router.put('/:id', updatePlan);
 router.delete('/:id', deletePlan);
 
 export default router;
-=======
-import { Router } from "express";
-import { getPlans } from "../controllers/plan.controller.js";
-
-const planRouter = Router();
-
-planRouter.get("/", getPlans);
-
-export default planRouter;
->>>>>>> 6246832901513bf198eb42032b3b978e56a06d60
