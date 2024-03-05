@@ -154,7 +154,10 @@ export const getMoviesgenre = async (req, res) => {
         const favoriteGenres = favoriteMoviesDetails.map(movie => movie.genre);
 
         // Find movies with the same genres as the user's favorite movies
-        const recommendedMovies = await Movie.find({ genre: { $in: favoriteGenres } });
+        const recommendedMovies = await Movie.find({
+            genre: { $in: favoriteGenres },
+            _id: { $nin: user.favouriteMovies } // Exclude movies that already exist in favorites
+        });
 
         // Return the list of recommended movies with details
         return res.status(200).json({ recommendedMovies });
@@ -163,6 +166,7 @@ export const getMoviesgenre = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+
 
 
 export const checkIsFavoris = async (req, res) => {
