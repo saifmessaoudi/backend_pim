@@ -10,8 +10,7 @@ import bodyParser from "body-parser";
 import ejs from "ejs";
 import movieRouter from "./routes/movie.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
-import Plan from "./models/plan.model.js";
-
+import planRouter from "./routes/plan.routes.js";
 // Load environment variables
 dotenv.config();
 
@@ -35,7 +34,11 @@ app.use('/movies', movieRouter);
 app.use("/user", router);
 app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
+<<<<<<< HEAD
 app.use("/plans" , planrouter)
+=======
+app.use("/plan", planRouter);
+>>>>>>> 6246832901513bf198eb42032b3b978e56a06d60
 
 
 app.listen(process.env.PORT, () => {
