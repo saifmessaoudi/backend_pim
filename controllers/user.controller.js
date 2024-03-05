@@ -796,12 +796,22 @@ export const selectedroulette = async (req, res) => {
     }
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    if (user.lastGiftSelectionDate && user.lastGiftSelectionDate > twentyFourHoursAgo) {
+
+    // Check if the user has played in the last 24 hours
+    if (
+      (user.lastGiftSelectionDate && user.lastGiftSelectionDate > twentyFourHoursAgo) ||
+      (user.lastGiftReceivedDate && user.lastGiftReceivedDate > twentyFourHoursAgo)
+    ) {
       return res.status(400).send('You can only play once every 24 hours');
     }
 
-    // Update the user's selected gift and lastGiftSelectionDate
-    user.set({ selectedgift: gift, lastGiftSelectionDate: new Date() });
+    // Update the user's selected gift, lastGiftSelectionDate, and lastGiftReceivedDate
+    user.set({
+      selectedgift: gift,
+      lastGiftSelectionDate: new Date(),
+      lastGiftReceivedDate: new Date(),
+    });
+ 
     await user.save();
 
     console.log(`Selected gift: ${gift} for User: ${userId}`);

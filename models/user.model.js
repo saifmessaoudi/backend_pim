@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
       friendRequestsSent : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
       favouriteMovies : [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie"}],
       isBanend : { type: Boolean, default: false},
+      lastGiftReceivedDate: { type: Date },
       favouriteGenders: {
         type: [{
             type: String,
