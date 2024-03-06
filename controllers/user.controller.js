@@ -779,6 +779,7 @@ export const unbanUser = async (req, res) => {
       res.status(500).json({ error: 'Failed to unban user' });
   }
 };
+
 export const selectedroulette = async (req, res) => {
   try {
     const { userId } = req.params;
