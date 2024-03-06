@@ -19,7 +19,7 @@ import { dirname } from 'path';
 import Room from "./models/room.model.js";
 import ioo from 'socket.io-client';
 import { Server } from "socket.io";
-
+import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
 
 const app = express();
@@ -66,6 +66,7 @@ app.use("/user", router);
 app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
+app.use("/reclamation",reclamationRouter );
 app.use(cors());
 
 app.use('/room',roomrouter) ; 
