@@ -1,14 +1,7 @@
 import mongoose from "mongoose";
 import Plan from "../models/plan.model.js";
 
-export const getPlans = async (req, res) => {
-  try {
-    const plans = await Plan.find();
-    res.status(200).json(plans);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};
+
 export const createPlan = async (req, res) => {
   try {
     const { title, description, price, duration } = req.body;
@@ -18,6 +11,20 @@ export const createPlan = async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
+};
+
+// Obtenir tous les plans
+
+
+export const getPlans = async (req, res) => {
+ 
+    try {
+        const plans = await Plan.find();
+        res.status(200).json(plans);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+
 };
 
 // Obtenir un plan par ID
@@ -75,4 +82,5 @@ export const deletePlan = async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-};
+}
+

@@ -154,4 +154,21 @@ export const checkIsFavoris = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
         }
     };
-  
+
+export const getById = async (req, res) => {
+    const movieId = req.params.movieId;
+    
+    try {
+        const movie = await Movie.findById(movieId);
+        if (!movie) {
+            return res.status(404).json({ message: 'Movie not found' });
+        }
+            // Retourne l'ID du film et l'attribut link
+        const { _id, link } = movie;
+        return res.status(200).json({ _id, link });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Server error' });
+        }
+    };
+    

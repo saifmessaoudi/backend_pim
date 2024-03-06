@@ -8,7 +8,10 @@ import { sendSMS } from "../config/SmsService.js";
 const subscriptionRouter = Router();
 
 subscriptionRouter.post("/verifyPayment", verifyPayment);
+
+subscriptionRouter.post('/send', sendSMS);
+
 subscriptionRouter.post("/verifyUserStatus", verifyUserStatus);
-subscriptionRouter.post("/send", sendSMS);
+
 
 export default subscriptionRouter;
