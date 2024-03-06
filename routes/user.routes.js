@@ -9,7 +9,7 @@ import { registerUser,loginUser,verifyEmail } from '../controllers/AuthControlle
 import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
-import  {getAll,addInvitation,deleteInvitation,getFriendsById,acceptInvitation ,deleteUser} from '../controllers/user.controller.js';
+import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser} from '../controllers/user.controller.js';
 import  {addMovieGenders,deleteMovieGenders,getGendersById} from '../controllers/user.controller.js';
 
 const router = Router();

@@ -61,9 +61,9 @@ app.use(cors(
 ));
 app.use(express.static("public"));
 
-app.use("/movies", movieRouter);
+app.use("/movies", movierouter);
 app.use("/user", router);
-app.use("/movie", movieRouter);
+app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
 app.use(cors());

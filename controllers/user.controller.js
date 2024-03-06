@@ -429,6 +429,92 @@ table, td { color: #000000; } #u_body a { color: #161a39; text-decoration: under
     res.status(500).json({ message: error.message });
   }
 };
+export async function acceptInvitation(req, res) {
+  try {
+    const { sender, recipient } = req.body;
+
+    const senderExists = await User.findById({ _id: sender });
+    const recipientExists = await User.findById({ _id: recipient });
+    if (!senderExists || !recipientExists) {
+      return res
+        .status(404)
+        .json({ message: "Sender or recipient does not exist" });
+    }
+    const Usersender = await User.findOne({ _id: sender });
+    const Userrecipient = await User.findOne({ _id: recipient });
+
+    const senderverif = Usersender.friendRequestsSent.includes(recipient);
+    const recipientverif = Userrecipient.friendRequests.includes(sender);
+
+    if (senderverif || recipientverif) {
+      return res.status(404).json({ message: "the invitation is accepted" });
+    }
+
+    await User.findByIdAndUpdate(recipient, { $push: { friends: sender } });
+    await User.findByIdAndUpdate(sender, { $push: { friends: recipient } });
+    await User.findByIdAndUpdate(sender, {
+      $pull: { friendRequestsSent: recipient },
+    });
+    await User.findByIdAndUpdate(recipient, {
+      $pull: { friendRequestsSent: sender },
+    });
+    await User.findByIdAndUpdate(sender, {
+      $pull: { friendRequests: recipient },
+    });
+    await User.findByIdAndUpdate(recipient, {
+      $pull: { friendRequests: sender },
+    });
+
+    res.status(201).json({ message: "Invitation added successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const getGendersById = async (req, res) => {
+  try {
+    const { sender } = req.params ; 
+
+    const user = await User.findOne({ _id: sender }); 
+
+    if (!user) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    res.status(200).json({ favouriteGenders: user.favouriteGenders });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message }); 
+  }
+};
+
+export async function refuseInvitation(req, res) {
+  try {
+    const { sender, recipient } = req.body;
+    const senderExists = await User.findById({ _id: sender });
+    const recipientExists = await User.findById({ _id: recipient });
+
+    if (!senderExists || !recipientExists) {
+      return res
+        .status(404)
+        .json({ message: "Sender or recipient does not exist" });
+    }
+
+    await User.findByIdAndUpdate(sender, {
+      $pull: { friendRequestsSent: recipient },
+    });
+
+    await User.findByIdAndUpdate(recipient, {
+      $pull: { friendRequests: sender },
+    });
+
+    res.status(201).json({ message: "Invitation refused " });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
 
 export const verifyUserWithGoogle = async (req, res) => {
   const googleIdToken = req.body.googleIdToken;
@@ -581,8 +667,8 @@ export async function addInvitation(req, res) {
   try {
     const { sender, recipient } = req.body;
 
-    const senderExists = await User.exists({ _id: sender });
-    const recipientExists = await User.exists({ _id: recipient });
+    const senderExists = await User.findById({  sender });
+    const recipientExists = await User.findById({  recipient });
 
         if (!senderExists || !recipientExists) {
             return res.status(404).json({ message: 'Sender or recipient does not exist' });
