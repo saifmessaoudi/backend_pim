@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { addMovie ,rateMovie ,fetchUserRating,removeRating} from "../controllers/movie.controller.js";
-import { trendingMovies , listMovies, toprated } from "../controllers/movieController.js";
 import { addtofavoris ,getFavoris ,checkIsFavoris} from '../controllers/movie.controller.js';
 import { listMovies} from '../controllers/movieController.js';
 const movieRouter = Router();
