@@ -142,18 +142,6 @@ app.post("/addMessage", async (req, res) => {
     }
 });
 
-app.post("/triggerNotification", (req, res) => {
-    const notificationData = {
-        type: 'new_message',
-        message: 'A new message has been added!',
-        data: { content: 'Hello from the server!' }
-    };
-
-    io.emit('connection', notificationData);
-    console.log('Emitted testNotification event from the server');
-
-    res.status(200).json({ message: "Notification triggered successfully" });
-});
 
 app.use("/quiz", quizRouter);
 
