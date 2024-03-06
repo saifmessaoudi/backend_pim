@@ -3,9 +3,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/mailer.js";
 import { OAuth2Client } from "google-auth-library";
-import mongoose from "mongoose";
+import mongoose from "mongoose"
+import { io } from "../server.js"; // Import io from server.js
+
+
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+
+
+
+
+
 
 export const resetPassword = async (req, res) => {
     const { email, password, newPassword } = req.body;
@@ -542,55 +551,65 @@ export async function getAll(req, res) {
 }
 
 
-export const getfriendsById = async (req, res) => {
+export const getFriendsById = async (req, res) => {
   try {
-    const { sender } = req.params ; 
+    const { sender } = req.params;
+    const users = []; 
 
-    const user = await User.findOne({ _id: sender }); 
+    const user = await User.findOne({ _id: sender });
 
     if (!user) {
       return res.status(404).json({ message: 'User does not exist' });
     }
 
-    res.status(200).json({ friends: user.friends });
+    for (const friendId of user.friends) {
+      const friend = await User.findOne({ _id: friendId });
+      if (friend) {
+        users.push(friend); 
+      }
+    }
+
+    res.status(200).json(users);
 
   } catch (error) {
-    res.status(500).json({ message: error.message }); 
+    res.status(500).json({ message: error.message });
   }
 };
 
 export async function addInvitation(req, res) {
-    try {
-        const { sender, recipient } = req.body;
+  try {
+    const { sender, recipient } = req.body;
 
-        const senderExists = await User.exists({ _id: sender });
-        const recipientExists = await User.exists({ _id: recipient });
+    const senderExists = await User.exists({ _id: sender });
+    const recipientExists = await User.exists({ _id: recipient });
 
-        if (!senderExists || !recipientExists) {
-            return res.status(404).json({ message: 'Sender or recipient does not exist' });
-        }
-            const Usersender = await User.findOne({ _id: sender }); 
-            const Userrecipient = await User.findOne({ _id: recipient });
- 
-        
-
-           const senderverif = Usersender.friendRequestsSent.includes(recipient);
-           const recipientverif = Userrecipient.friendRequests.includes(sender);
-     
-        if ( senderverif || recipientverif) {
-            return res.status(404).json({ message: 'the invitation is already added' });
-        }
-
-        await User.findByIdAndUpdate(sender, { $push: { friendRequestsSent: recipient } });
-
-       
-        await User.findByIdAndUpdate(recipient, { $push: { friendRequests: sender } });
-
-        res.status(201).json({ message: 'Invitation created successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (!senderExists || !recipientExists) {
+      return res.status(404).json({ message: 'Sender or recipient does not exist' });
     }
+
+    const Usersender = await User.findOne({ _id: sender }); 
+    const Userrecipient = await User.findOne({ _id: recipient });
+
+    const senderverif = Usersender.friendRequestsSent.includes(recipient);
+    const recipientverif = Userrecipient.friendRequests.includes(sender);
+   
+    if (senderverif || recipientverif) {
+      return res.status(404).json({ message: 'The invitation is already added' });
+    }
+
+    // Update database with friend requests
+    await User.findByIdAndUpdate(sender, { $push: { friendRequestsSent: recipient } });
+    await User.findByIdAndUpdate(recipient, { $push: { friendRequests: sender } });
+
+    // Notify recipient about the new invitation
+    const senderName = Usersender.name;
+    io.emit('invitation', { sender, senderName });
+
+    res.status(201).json({ message: 'Invitation created successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 }
 
 export async function deleteInvitation(req,res){
@@ -773,7 +792,57 @@ export const unbanUser = async (req, res) => {
       res.status(500).json({ error: 'Failed to unban user' });
   }
 };
+export const getGendersById = async (req, res) => {
+  try {
+    const { sender } = req.params ; 
+
+    const user = await User.findOne({ _id: sender }); 
+
+    if (!user) {
+      return res.status(404).json({ message: 'User does not exist' });
+    }
+
+    res.status(200).json({ favouriteGenders: user.favouriteGenders });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message }); 
+  }
+};
 
 
 
 
+export const acceptInvitation = async (req, res) => {
+  try {
+    const { sender, recipient } = req.body;
+
+    const senderExists = await User.exists({ _id: sender });
+    const recipientExists = await User.exists({ _id: recipient });
+
+    if (!senderExists || !recipientExists) {
+      return res.status(404).json({ message: 'Sender or recipient does not exist' });
+    }
+
+    const userSender = await User.findOne({ _id: sender });
+    const userRecipient = await User.findOne({ _id: recipient });
+
+    const senderVerification = userSender.friendRequestsSent.includes(recipient);
+    const recipientVerification = userRecipient.friendRequests.includes(sender);
+
+    if (!senderVerification || !recipientVerification) {
+      return res.status(404).json({ message: 'The invitation is not already added' });
+    }
+
+    await User.findByIdAndUpdate(sender, { $pull: { friendRequestsSent: recipient } });
+    await User.findByIdAndUpdate(recipient, { $pull: { friendRequests: sender } });
+
+    await User.findByIdAndUpdate(sender, { $push: { friends: recipient } });
+    await User.findByIdAndUpdate(recipient, { $push: { friends: sender } });
+
+    
+    res.status(201).json({ message: 'Invitation is removed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

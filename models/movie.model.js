@@ -1,3 +1,4 @@
+import { Double } from "bson";
 import mongoose from "mongoose";
 const { Schema, model } = mongoose; 
 
