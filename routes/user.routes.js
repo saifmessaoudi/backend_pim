@@ -6,7 +6,7 @@ import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
-import { getAllUsers, getById, updatePassword, updateUser } from '../controllers/user.controller.js';
+import { getAllUsers, getById, updatePassword, updateUser , selectedroulette } from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
 import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser} from '../controllers/user.controller.js';
@@ -16,6 +16,7 @@ const router = Router();
 const upload = imageUploadMiddleware("profilePicture",{ fileSize: 1024 * 1024 * 5 });
 
 router.post ('/reset-password', sendPasswordResetEmail);
+router.post('/giftroulette/:userId',selectedroulette)
 
 router.get('/reset-password/:token', (req, res) => {
     const token = req.params.token;
@@ -62,7 +63,7 @@ router.post('/login', loginUser);
 router.get("/users" , getAllUsers);
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
-
+router.delete('/deleteUser/:username', deleteUser);
   router.route('/')
    .get(getAll)
 

@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
       email : { type: String, required: true, unique: true},
       username : { type: String, required: true, unique: true},
       password : { type: String, required: true},
+      selectedgift : { type: String, required: true},
       role : { type: String, default: "user"},
       birthDate : { type: Date},
       bio : { type: String},
@@ -18,6 +19,7 @@ const userSchema = new mongoose.Schema(
       friendRequestsSent : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
       favouriteMovies : [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie"}],
       isBanend : { type: Boolean, default: false},
+      lastGiftReceivedDate: { type: Date },
       favouriteGenders: {
         type: [{
             type: String,

@@ -136,6 +136,38 @@ export const addtofavoris = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+export const getMoviesgenre = async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        // Find the user by username
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        // Fetch detailed information for each favorite movie using the IDs
+        const favoriteMoviesDetails = await Movie.find({ _id: { $in: user.favouriteMovies } });
+
+        // Extract genres from the favorite movies
+        const favoriteGenres = favoriteMoviesDetails.map(movie => movie.genre);
+
+        // Find movies with the same genres as the user's favorite movies
+        const recommendedMovies = await Movie.find({
+            genre: { $in: favoriteGenres },
+            _id: { $nin: user.favouriteMovies } // Exclude movies that already exist in favorites
+        });
+
+        // Return the list of recommended movies with details
+        return res.status(200).json({ recommendedMovies });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+
 
 export const checkIsFavoris = async (req, res) => {
     const { userId } = req.params;
