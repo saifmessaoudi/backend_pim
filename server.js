@@ -5,8 +5,8 @@ import cors from "cors";
 import router from "./routes/user.routes.js";
 import movierouter from "./routes/movie.routes.js";
 import roomrouter from "./routes/room.routes.js";
+
 import bodyParser from "body-parser";
-import movieRouter from "./routes/movie.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
 import planRouter from "./routes/plan.routes.js";
 import ejs from "ejs";
@@ -20,6 +20,7 @@ import Room from "./models/room.model.js";
 import ioo from 'socket.io-client';
 import { Server } from "socket.io";
 
+import quizRouter from "./routes/quiz.routes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -30,12 +31,7 @@ const __dirname = dirname(__filename);
 
 
 
-dotenv.config();
 
-
-
-app.set('view engine', 'ejs');
-app.set('views' , './public');
 
 
 // Serve static files from the 'public' directory
@@ -43,6 +39,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve the 'index.html' file when the root URL is accessed
 
+
+// Load environment variables
+dotenv.config();
+
+app.set("view engine", "ejs");
+app.set("views", "./public");
 
 // Connect to the database
 connectDB();
@@ -59,9 +61,9 @@ app.use(cors(
 ));
 app.use(express.static("public"));
 
-app.use('/movies', movieRouter);
+app.use("/movies", movieRouter);
 app.use("/user", router);
-app.use("/movie" ,movieRouter )
+app.use("/movie", movieRouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
 app.use(cors());
@@ -152,10 +154,16 @@ app.post("/triggerNotification", (req, res) => {
     res.status(200).json({ message: "Notification triggered successfully" });
 });
 
+app.use("/quiz", quizRouter);
+
 
 server.listen(process.env.PORT, () => {
     console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
 });
+
+
+
+
 
 
 

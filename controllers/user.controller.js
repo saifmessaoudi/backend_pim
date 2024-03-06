@@ -17,38 +17,37 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 
 export const resetPassword = async (req, res) => {
-    const { email, password, newPassword } = req.body;
-    try {
-        const user
-        = await
-        User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid password" });
-        }
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(newPassword, salt);
-        await user.save();
-        res.status(200).json({ message: "Password updated" });
+  const { email, password, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-    catch (error) {
-        res.status(500).json({ message: error.message });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid password" });
     }
-}
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    res.status(200).json({ message: "Password updated" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const sendPasswordResetEmail = async (req, res) => {
-    const { email } = req.body;
-    try {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      const resetLink = `${process.env.CLIENT_URL}/user/reset-password/${token}`;
-      const emailTemplate = `
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    const resetLink = `${process.env.CLIENT_URL}/user/reset-password/${token}`;
+    const emailTemplate = `
      <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -421,155 +420,157 @@ table, td { color: #000000; } #u_body a { color: #161a39; text-decoration: under
 
       `;
 
-      user.resetVerificationToken = token;
-        await user.save();
-      await sendEmail(email, 'Password Reset', emailTemplate);
-  
-      res.status(200).json({ message: 'Password reset link sent' });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+    user.resetVerificationToken = token;
+    await user.save();
+    await sendEmail(email, "Password Reset", emailTemplate);
 
-  export const verifyUserWithGoogle = async (req, res) => {
-    const googleIdToken = req.body.googleIdToken;
-    console.log(googleIdToken);
-     try{
-      const ticket = await client.verifyIdToken({
-        idToken: googleIdToken,
-        audience: process.env.GOOGLE_CLIENT_ID,
-     });
-      const payload = ticket.getPayload();
-      const email = payload.email;
-
-      
-     
-      let user = await User.findOne({ email: email });
-      if (!user) {
-        user = new User({
-          email: email,
-          username: payload.name,
-          profilePicture: payload.picture,
-          isVerified: true,
-         
-        });
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash("googleSignInPlaceholderPassword", salt);
-        await user.save();
-        const token = jwt.sign({ user: user }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        return res.status(200).json({ token });
-      }
-      if (user.isBanned === true) {
-        return res.status(400).json({ message: "Your account is banned ! Please contact the support." });
-      }
-      const token = jwt.sign({ user: user  }, process.env.JWT_SECRET, { expiresIn: "1h" });
-      res.status(200).json({token});
-  }catch (error) {
-    res.status(400).json(error.message);
+    res.status(200).json({ message: "Password reset link sent" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-  }
-
-
-export const getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find().select("-password");
-        if (users.length === 0) {
-            return res.status(400).json("No users found");
-        }
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(404).json({ message: error.message });
-    }
 };
 
+export const verifyUserWithGoogle = async (req, res) => {
+  const googleIdToken = req.body.googleIdToken;
+  console.log(googleIdToken);
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: googleIdToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const email = payload.email;
 
+    let user = await User.findOne({ email: email });
+    if (!user) {
+      user = new User({
+        email: email,
+        username: payload.name,
+        profilePicture: payload.picture,
+        isVerified: true,
+      });
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(
+        "googleSignInPlaceholderPassword",
+        salt
+      );
+      await user.save();
+      const token = jwt.sign({ user: user }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      return res.status(200).json({ token });
+    }
+    if (user.isBanned === true) {
+      return res.status(400).json({
+        message: "Your account is banned ! Please contact the support.",
+      });
+    }
+    const token = jwt.sign({ user: user }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    res.status(200).json({ token });
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    if (users.length === 0) {
+      return res.status(400).json("No users found");
+    }
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 
 export const getById = async (req, res) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No user with id: ${id}`);
-    try {
-        const user = await User.findById(id).select("-password");
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(404).send(`No user with id: ${id}`);
+  try {
+    const user = await User.findById(id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const updateUser = async (req, res) => {
-    const { id } = req.params;
-    const { username, firstName, lastName, birthDate, bio } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No user with id: ${id}`);
-    const updatedUser = { username, firstName, lastName, birthDate, bio ,profilePicture:`${req.protocol}://${req.get("host")}/img/${req.file.filename}` };
-    await User.findByIdAndUpdate(id, updatedUser, { new: true });
-    res.json(updatedUser);
+  const { id } = req.params;
+  const { username, firstName, lastName, birthDate, bio } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(404).send(`No user with id: ${id}`);
+  const updatedUser = {
+    username,
+    firstName,
+    lastName,
+    birthDate,
+    bio,
+    profilePicture: `${req.protocol}://${req.get("host")}/img/${
+      req.file.filename
+    }`,
+  };
+  await User.findByIdAndUpdate(id, updatedUser, { new: true });
+  res.json(updatedUser);
 };
 
 export const updatePassword = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const oldPassword = req.body.oldPassword;
-        const newPassword = req.body.newPassword;
-        
-        const user = await User.findById(id);
-        
-        if (!user) {
-            return res.status(400).json({ message: "User does not exist" });
-        }
-        
-        // Vérifiez si l'ancien mot de passe correspond
-        const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: "Old password is incorrect" });
-        }
+  try {
+    const id = req.params.id;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
 
-        // Si l'ancien mot de passe est correct, mettez à jour le mot de passe
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-        const updatedUser = { password: hashedPassword, passwordResetToken: null };
-        await User.findOneAndUpdate({ _id: id }, updatedUser);
-        
-        res.status(200).json({ message: "Password reset successfully" });
-    } catch (error) {
-        res.status(400).json(error.message);
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
     }
+
+    // Vérifiez si l'ancien mot de passe correspond
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    // Si l'ancien mot de passe est correct, mettez à jour le mot de passe
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    const updatedUser = { password: hashedPassword, passwordResetToken: null };
+    await User.findOneAndUpdate({ _id: id }, updatedUser);
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
 };
 
-
 export async function getAll(req, res) {
-  
-    User
-    .find({})
-    .then(docs => {
-        res.status(200).json(docs);
+  User.find({})
+    .then((docs) => {
+      res.status(200).json(docs);
     })
-    .catch(err => {
-        res.status(500).json({ error: err });
+    .catch((err) => {
+      res.status(500).json({ error: err });
     });
 }
 
-
 export const getFriendsById = async (req, res) => {
   try {
-    const { sender } = req.params;
-    const users = []; 
+    const { sender } = req.params ; 
 
     const user = await User.findOne({ _id: sender });
 
     if (!user) {
-      return res.status(404).json({ message: 'User does not exist' });
+      return res.status(404).json({ message: "User does not exist" });
     }
 
-    for (const friendId of user.friends) {
-      const friend = await User.findOne({ _id: friendId });
-      if (friend) {
-        users.push(friend); 
-      }
-    }
-
-    res.status(200).json(users);
+    res.status(200).json({ friends: user.friends });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -583,72 +584,69 @@ export async function addInvitation(req, res) {
     const senderExists = await User.exists({ _id: sender });
     const recipientExists = await User.exists({ _id: recipient });
 
-    if (!senderExists || !recipientExists) {
-      return res.status(404).json({ message: 'Sender or recipient does not exist' });
-    }
-
-    const Usersender = await User.findOne({ _id: sender }); 
-    const Userrecipient = await User.findOne({ _id: recipient });
-
-    const senderverif = Usersender.friendRequestsSent.includes(recipient);
-    const recipientverif = Userrecipient.friendRequests.includes(sender);
-   
-    if (senderverif || recipientverif) {
-      return res.status(404).json({ message: 'The invitation is already added' });
-    }
-
-    // Update database with friend requests
-    await User.findByIdAndUpdate(sender, { $push: { friendRequestsSent: recipient } });
-    await User.findByIdAndUpdate(recipient, { $push: { friendRequests: sender } });
-
-    // Notify recipient about the new invitation
-    const senderName = Usersender.name;
-    io.emit('invitation', { sender, senderName });
-
-    res.status(201).json({ message: 'Invitation created successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-}
-
-export async function deleteInvitation(req,res){
-    try{
-        const { sender, recipient } = req.body;
-        const senderExists = await User.exists({ _id: sender });
-        const recipientExists = await User.exists({ _id: recipient });
-
         if (!senderExists || !recipientExists) {
             return res.status(404).json({ message: 'Sender or recipient does not exist' });
         }
             const Usersender = await User.findOne({ _id: sender }); 
             const Userrecipient = await User.findOne({ _id: recipient });
-
-
-            const senderverif = Usersender.friendRequestsSent.includes(recipient);
-            const recipientverif = Userrecipient.friendRequests.includes(sender);
-      
-             
  
-         if ( !senderverif || !recipientverif) {
-             return res.status(404).json({ message: 'the invitation is not already added' });
-         }
-         await User.findByIdAndUpdate(sender, { $pull: { friendRequestsSent: recipient } });
+        
+
+           const senderverif = Usersender.friendRequestsSent.includes(recipient);
+           const recipientverif = Userrecipient.friendRequests.includes(sender);
+     
+        if ( senderverif || recipientverif) {
+            return res.status(404).json({ message: 'the invitation is already added' });
+        }
+
+        await User.findByIdAndUpdate(sender, { $push: { friendRequestsSent: recipient } });
 
        
-         await User.findByIdAndUpdate(recipient, { $pull: { friendRequests: sender } });
- 
-         res.status(201).json({ message: 'Invitation is removed successfully' });
+        await User.findByIdAndUpdate(recipient, { $push: { friendRequests: sender } });
 
-
-
-    } catch(error){
-        console.error(error) ; 
-        res.status(500).json({message : "Internal server error"}) ; 
+        res.status(201).json({ message: 'Invitation created successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-
 }
 
+export async function deleteInvitation(req, res) {
+  try {
+    const { sender, recipient } = req.body;
+    const senderExists = await User.exists({ _id: sender });
+    const recipientExists = await User.exists({ _id: recipient });
+
+    if (!senderExists || !recipientExists) {
+      return res
+        .status(404)
+        .json({ message: "Sender or recipient does not exist" });
+    }
+    const Usersender = await User.findOne({ _id: sender });
+    const Userrecipient = await User.findOne({ _id: recipient });
+
+    const senderverif = Usersender.friendRequestsSent.includes(recipient);
+    const recipientverif = Userrecipient.friendRequests.includes(sender);
+
+    if (!senderverif || !recipientverif) {
+      return res
+        .status(404)
+        .json({ message: "the invitation is not already added" });
+    }
+    await User.findByIdAndUpdate(sender, {
+      $pull: { friendRequestsSent: recipient },
+    });
+
+    await User.findByIdAndUpdate(recipient, {
+      $pull: { friendRequests: sender },
+    });
+
+    res.status(201).json({ message: "Invitation is removed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
 
 export async function addMovieGenders(req, res) {
   try {
@@ -657,29 +655,27 @@ export async function addMovieGenders(req, res) {
     const userExists = await User.exists({ _id: userID });
 
     if (!userExists) {
-      return res.status(404).json({ message: 'User does not exist' });
+      return res.status(404).json({ message: "User does not exist" });
     }
 
     const user = await User.findOne({ _id: userID });
 
     for (let i = 0; i < 3; i++) {
       if (!user.favouriteGenders[i] || user.favouriteGenders[i] !== gender) {
-        await User.findByIdAndUpdate(userID, { $push: { favouriteGenders: gender } });
-        res.status(201).json({ message: 'Gender added successfully' });
+        await User.findByIdAndUpdate(userID, {
+          $push: { favouriteGenders: gender },
+        });
+        res.status(201).json({ message: "Gender added successfully" });
         break;
-      }
-      else{
-        res.status(201).json({ message: 'Gender not added successfully' });
+      } else {
+        res.status(201).json({ message: "Gender not added successfully" });
       }
     }
-
-    
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 }
-
 
 export async function deleteMovieGenders(req, res) {
   try {
@@ -688,28 +684,50 @@ export async function deleteMovieGenders(req, res) {
     const userExists = await User.exists({ _id: userID });
 
     if (!userExists) {
-      return res.status(404).json({ message: 'User does not exist' });
+      return res.status(404).json({ message: "User does not exist" });
     }
 
     const user = await User.findOne({ _id: userID });
     const genderverif = user.favouriteGenders.includes(gender);
 
-    if ( !genderverif ) {
-      return res.status(404).json({ message: 'the gender is not already added' });
-  }
+    if (!genderverif) {
+      return res
+        .status(404)
+        .json({ message: "the gender is not already added" });
+    }
 
-  await User.findByIdAndUpdate(userID, { $pull: { favouriteGenders: gender } });
+    await User.findByIdAndUpdate(userID, {
+      $pull: { favouriteGenders: gender },
+    });
 
-
-    
-
-    res.status(201).json({ message: 'Gender deleted successfully' });
+    res.status(201).json({ message: "Gender deleted successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
+export const getfriendsRequest = async (req, res) => {
+  try {
+    const { recipient } = req.params;
+    const user = await User.findById(recipient);
+    if (!user) {
+      return res.status(404).json({ message: "user does not exist" });
+    }
+    const friendRequests = user.friendRequests;
+    const requests = [];
+    for (const friend of friendRequests) {
+      const user = await User.findById(friend);
+      if (!user) {
+        return res.status(404).json({ message: "user does not exist" });
+      }
+      requests.push(user);
+    }
+    res.status(200).json(requests);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const deleteUser = async (req, res) => {
   try {
@@ -718,23 +736,22 @@ export const deleteUser = async (req, res) => {
     const user = await User.findOne({ username });
 
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.status(400).json({ error: "User not found" });
     }
 
     await User.findOneAndDelete({ username });
 
-    res.status(200).json({ message: 'User deleted successfully' });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     console.error(`Error deleting user: ${error.message}`);
-    res.status(500).json({ error: 'Failed to delete user' });
+    res.status(500).json({ error: "Failed to delete user" });
   }
 };
 
-
-  export const getAllUsersAdmin = async (req, res) => {
+export const getAllUsersAdmin = async (req, res) => {
   try {
-    const allUsers = await User.find().select( "-createdAt -__v -updatedAt" );
-    
+    const allUsers = await User.find().select("-createdAt -__v -updatedAt");
+
     res.status(200).json(allUsers);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -742,107 +759,65 @@ export const deleteUser = async (req, res) => {
 };
 
 export const getUserById = async (req, res) => {
-    try {
-      const userId = req.params.id;
-  
-      const user = await User.findById(userId);
-  
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-  
-      res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-  };
 
- export const banUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-        // Use findByIdAndUpdate to update the 'banned' field directly
-        const user = await User.findByIdAndUpdate(userId, { isBanned: 'BANNED' }, { new: true });
+export const banUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
 
-        if (!user) {
-            throw new Error('User not found');
-        }
+    // Use findByIdAndUpdate to update the 'banned' field directly
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isBanned: "BANNED" },
+      { new: true }
+    );
 
-        res.status(200).json(user);
-    } catch (error) {
-        console.error('Error banning user: ${error.message}');
-        res.status(500).json({ error: 'Failed to ban user' });
+    if (!user) {
+      throw new Error("User not found");
     }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error banning user: ${error.message}");
+    res.status(500).json({ error: "Failed to ban user" });
+  }
 };
 
 export const unbanUser = async (req, res) => {
   try {
-      const userId = req.params.id;
+    const userId = req.params.id;
 
-      // Use findByIdAndUpdate to update the 'banned' field directly
-      const user = await User.findByIdAndUpdate(userId, { isBanned: 'UNBANNED' }, { new: true });
-
-      if (!user) {
-          throw new Error('User not found');
-      }
-
-      res.status(200).json(user);
-  } catch (error) {
-      console.error(`Error unbanning user: ${error.message}`);
-      res.status(500).json({ error: 'Failed to unban user' });
-  }
-};
-export const getGendersById = async (req, res) => {
-  try {
-    const { sender } = req.params ; 
-
-    const user = await User.findOne({ _id: sender }); 
+    // Use findByIdAndUpdate to update the 'banned' field directly
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isBanned: "UNBANNED" },
+      { new: true }
+    );
 
     if (!user) {
-      return res.status(404).json({ message: 'User does not exist' });
+      throw new Error("User not found");
     }
 
-    res.status(200).json({ favouriteGenders: user.favouriteGenders });
-
+    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message }); 
+    console.error(`Error unbanning user: ${error.message}`);
+    res.status(500).json({ error: "Failed to unban user" });
   }
 };
 
 
 
 
-export const acceptInvitation = async (req, res) => {
-  try {
-    const { sender, recipient } = req.body;
-
-    const senderExists = await User.exists({ _id: sender });
-    const recipientExists = await User.exists({ _id: recipient });
-
-    if (!senderExists || !recipientExists) {
-      return res.status(404).json({ message: 'Sender or recipient does not exist' });
-    }
-
-    const userSender = await User.findOne({ _id: sender });
-    const userRecipient = await User.findOne({ _id: recipient });
-
-    const senderVerification = userSender.friendRequestsSent.includes(recipient);
-    const recipientVerification = userRecipient.friendRequests.includes(sender);
-
-    if (!senderVerification || !recipientVerification) {
-      return res.status(404).json({ message: 'The invitation is not already added' });
-    }
-
-    await User.findByIdAndUpdate(sender, { $pull: { friendRequestsSent: recipient } });
-    await User.findByIdAndUpdate(recipient, { $pull: { friendRequests: sender } });
-
-    await User.findByIdAndUpdate(sender, { $push: { friends: recipient } });
-    await User.findByIdAndUpdate(recipient, { $push: { friends: sender } });
-
-    
-    res.status(201).json({ message: 'Invitation is removed successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};

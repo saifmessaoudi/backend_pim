@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { acceptInvitation, getfriendsRequest, refuseInvitation  } from "../controllers/user.controller.js";
 import { banUser, getAllUsersAdmin, getUserById, sendPasswordResetEmail , unbanUser, verifyUserWithGoogle } from "../controllers/user.controller.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
@@ -85,6 +86,15 @@ router.put("/updatePassword/:id" , updatePassword)
 
    router.route('/deleteInvitation')
    .patch(deleteInvitation)
+
+   router.route('/acceptinvitation')
+   .patch(acceptInvitation)
+
+   router.route('/refuseinvitation')
+   .patch(refuseInvitation)
+   router.route('/getfriendsrequests/:recipient')
+   .get(getfriendsRequest) 
+
 
    router.delete('/deleteUser/:username', deleteUser);
    
