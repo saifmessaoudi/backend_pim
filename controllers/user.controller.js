@@ -4,14 +4,14 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../utils/mailer.js";
 import { OAuth2Client } from "google-auth-library";
 import mongoose from "mongoose"
-import { io } from "../server.js"; // Import io from server.js
+import { io } from "../server.js";
+
+
+
 
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-
-
 
 
 
@@ -668,14 +668,14 @@ export async function addInvitation(req, res) {
   try {
     const { sender, recipient } = req.body;
 
-    const senderExists = await User.findById({  sender });
-    const recipientExists = await User.findById({  recipient });
+    const senderExists = await User.findOne({ _id: sender });
+    const recipientExists = await User.findOne({ _id: recipient });
 
         if (!senderExists || !recipientExists) {
             return res.status(404).json({ message: 'Sender or recipient does not exist' });
         }
-            const Usersender = await User.findOne({ _id: sender }); 
-            const Userrecipient = await User.findOne({ _id: recipient });
+        const Usersender = await User.findOne({ _id: sender });
+        const Userrecipient = await User.findOne({ _id: recipient });
  
         
 
@@ -686,11 +686,12 @@ export async function addInvitation(req, res) {
             return res.status(404).json({ message: 'the invitation is already added' });
         }
 
-        await User.findByIdAndUpdate(sender, { $push: { friendRequestsSent: recipient } });
+        await User.updateOne({ _id: sender }, { $push: { friendRequestsSent: recipient } });
 
-       
-        await User.findByIdAndUpdate(recipient, { $push: { friendRequests: sender } });
-
+        await User.updateOne({ _id: recipient }, { $push: { friendRequests: sender } });
+    
+        
+        io.to(recipient).emit('newFriendRequest', { sender, recipient });
         res.status(201).json({ message: 'Invitation created successfully' });
     } catch (error) {
         console.error(error);

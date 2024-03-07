@@ -75,12 +75,12 @@ app.use('/room',roomrouter) ;
 // ... (previous code)
 
 io.on('connection', (socket) => {
-    console.log('New connection');
+    console.log ('connected')
 
-    socket.on('joinRoom', (roomId) => {
-        console.log('Joining room:', roomId);
+    socket.on('joinRoom', (data) => {
+        const { roomId } = data;
         socket.join(roomId);
-        console.log(`User joined room ${roomId}`);
+        console.log(`A user joined room: ${roomId}`);
     });
 
     socket.on('notification', (msg, callback) => {
@@ -103,9 +103,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('testMessage', (data) => {
-        console.log('Received test message:', data);
-    });
 
     // Disconnect event
     socket.on('disconnect', () => {
@@ -133,7 +130,7 @@ app.post("/addMessage", async (req, res) => {
       room.messages.push({ sender: senderId, content });
       await room.save();
   
-      io.emit('connection', { senderId, content });
+      io.to(roomId).emit('chat message', { senderId, content });
   
       return res.status(200).json({ message: "Message added successfully" });
     } catch (error) {
