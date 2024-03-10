@@ -948,3 +948,13 @@ export const selectedroulette = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+export const stastverifiedaccount = async (req, res) => {
+try {
+  const verifiedUsersCount = await  User.countDocuments({ isVerified: true });
+  const inverseUsersCount = await User.countDocuments({ isVerified: false });
+  res.json({verifiedUsersCount, inverseUsersCount });
+
+}catch (error) {
+  res.status(500).json({ error: error.message });
+}
+};
