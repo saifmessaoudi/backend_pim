@@ -958,3 +958,33 @@ try {
   res.status(500).json({ error: error.message });
 }
 };
+export const findusersfriend = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const friendIds = user.friends;
+    const friends = [];
+    
+    for (const friendId of friendIds) {
+      const friend = await User.findById(friendId);
+      
+      if (!friend) {
+        console.error(`Friend with ID ${friendId} not found`);
+        // Skip this friend and continue with the loop
+        continue;
+      }
+      
+      friends.push(friend);
+    }
+    
+    res.status(200).json(friends);
+  } catch (error) {
+    console.error("Error finding user's friends:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
