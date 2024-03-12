@@ -116,18 +116,16 @@ app.post("/addMessage", async (req, res) => {
     try {
       const { roomId, senderId, content } = req.body;
   
-      // Validate request parameters
       if (!roomId || !senderId || !content) {
         return res.status(400).json({ error: "Missing required parameters" });
       }
   
-      // Save the message to MongoDB
       const room = await Room.findById(roomId);
       if (!room) {
         return res.status(404).json({ error: "Room not found" });
       }
   
-      room.messages.push({ sender: senderId, content });
+      room.messages.fpush({ sender: senderId, content });
       await room.save();
   
       io.to(roomId).emit('chat message', { senderId, content });
