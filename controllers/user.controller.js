@@ -981,8 +981,9 @@ export const findusersfriend = async (req, res) => {
       
       friends.push(friend);
     }
+    const nbrfriends = friends.length;
     
-    res.status(200).json(friends);
+    res.status(200).json({friends, nbrfriends});
   } catch (error) {
     console.error("Error finding user's friends:", error);
     res.status(500).json({ error: error.message });
