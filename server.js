@@ -124,7 +124,7 @@ app.post("/addMessage", async (req, res) => {
         return res.status(404).json({ error: "Room not found" });
       }
   
-      room.messages.fpush({ sender: senderId, content });
+      room.messages.push({ sender: senderId, content });
       await room.save();
   
       io.to(roomId).emit('chat message', { senderId, content });
