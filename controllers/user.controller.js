@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import movie from "../models/movie.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/mailer.js";
@@ -1033,3 +1034,23 @@ export const findusersfriendbyusername = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+  export const getGenreFilm = async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        // Assuming there's a 'User' model
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Assuming there's a 'Film' model and the films are stored in a field like 'favoriteFilms' in the user schema
+        const films = await movie.find({ _id: { $in: user.favouriteMovies } });
+
+        return res.status(200).json({ films });
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+

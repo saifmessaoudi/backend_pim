@@ -9,7 +9,7 @@ import { registerUser,loginUser,verifyEmail } from '../controllers/AuthControlle
 import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,stastverifiedaccount} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
-import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser} from '../controllers/user.controller.js';
+import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';
 import  {addMovieGenders,deleteMovieGenders,getGendersById,findusersfriend,getuserbyusername,findusersfriendbyusername} from '../controllers/user.controller.js';
 
 const router = Router();
@@ -105,5 +105,6 @@ router.delete('/deleteUser/:username', deleteUser);
    router.put('/ban/:id', banUser );
    router.put('/unban/:id', unbanUser);
   router.get('/waa/:userId', findusersfriend);
+  router.get('/:username/genres', getGenreFilm);
   router.get('/friends/:username', findusersfriendbyusername);
   export default  router;
