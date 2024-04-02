@@ -6,11 +6,11 @@ import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
 import { registerUser,loginUser,verifyEmail } from '../controllers/AuthController.js';
-import { getAllUsers, getById, updatePassword, updateUser , selectedroulette } from '../controllers/user.controller.js';
+import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,stastverifiedaccount} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
 import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser} from '../controllers/user.controller.js';
-import  {addMovieGenders,deleteMovieGenders,getGendersById} from '../controllers/user.controller.js';
+import  {addMovieGenders,deleteMovieGenders,getGendersById,findusersfriend,getuserbyusername,findusersfriendbyusername} from '../controllers/user.controller.js';
 
 const router = Router();
 const upload = imageUploadMiddleware("profilePicture",{ fileSize: 1024 * 1024 * 5 });
@@ -52,7 +52,7 @@ router.post("/change-password", async (req, res) => {
 
 
 router.post('/verify-google', verifyUserWithGoogle);
-
+router.get('/stats',stastverifiedaccount);
 router.post('/register', [
     body('username').notEmpty().isLength({ min: 5 }),
     body('email').isEmail(),
@@ -96,12 +96,14 @@ router.delete('/deleteUser/:username', deleteUser);
    .patch(refuseInvitation)
    router.route('/getfriendsrequests/:recipient')
    .get(getfriendsRequest) 
-
+    
 
    router.delete('/deleteUser/:username', deleteUser);
-   
+   router.get('/test/:username',getuserbyusername);
    router.get("/users",getAllUsersAdmin);
    router.get('/user/:id', getUserById);
    router.put('/ban/:id', banUser );
    router.put('/unban/:id', unbanUser);
+  router.get('/waa/:userId', findusersfriend);
+  router.get('/friends/:username', findusersfriendbyusername);
   export default  router;

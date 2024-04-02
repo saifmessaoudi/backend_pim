@@ -55,7 +55,6 @@ app.use(morgan("dev"));
 app.use("/img", express.static("public/images"));
 app.use(cors(
     {
-        origin: process.env.CLIENT_URL,
         credentials: true,
     }
 ));
