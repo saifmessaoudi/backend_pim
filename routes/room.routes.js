@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addRoom,addRoomInvitation,deleteRoomInvitation,getAllRooms} from '../controllers/room.controller.js';
+import { addRoom,addRoomInvitation,deleteRoomInvitation,getAllRooms,addaUserAccess,deleteUserAccess,addChatAccess,deleteChatAccess,addOwnerAccess,deleteOwnerAccess} from '../controllers/room.controller.js';
 
 const roomrouter = Router();
 
@@ -23,5 +23,19 @@ roomrouter.route('/deleteroominvitation')
 
 roomrouter.route('/getRooms')
 .get(getAllRooms)
+
+roomrouter.route('/addAccess')
+.patch(addaUserAccess)
+roomrouter.route('/addOwnerAccess')
+.patch(addOwnerAccess)
+roomrouter.route('/deleteOwnerAccess')
+.patch(deleteOwnerAccess)
+roomrouter.route('/deleteAccess')
+.patch(deleteUserAccess)
+roomrouter.route('/addChatAccess')
+.patch(addChatAccess)
+roomrouter.route('/deleteChataccess')
+.patch(deleteChatAccess)
+
 
 export default  roomrouter;
