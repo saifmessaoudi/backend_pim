@@ -5,6 +5,7 @@ import cors from "cors";
 import router from "./routes/user.routes.js";
 import movierouter from "./routes/movie.routes.js";
 import roomrouter from "./routes/room.routes.js";
+import User from "./models/user.model.js";
 
 import bodyParser from "body-parser";
 import subscriptionRouter from "./routes/subscription.routes.js";
@@ -124,17 +125,23 @@ app.post("/addMessage", async (req, res) => {
         return res.status(404).json({ error: "Room not found" });
       }
   
-      room.messages.push({ sender: senderId, content });
+      const timestamp = new Date(); // Get current timestamp
+      const user = await User.findById(senderId); // Fetch user information
+      const message = { sender:senderId, content, timestamp, user }; // Include user information in the message
+      room.messages.push(message);
       await room.save();
   
-      io.to(roomId).emit('chat message', { senderId, content });
+      io.to(roomId).emit('chat message', message); // Send message with user information to client
   
       return res.status(200).json({ message: "Message added successfully" });
     } catch (error) {
       console.error("Error adding message:", error.message);
       return res.status(500).json({ error: "Internal Server Error" });
     }
-});
+  });
+  
+  
+  
 
 
 app.use("/quiz", quizRouter);

@@ -107,17 +107,23 @@ import User from "../models/user.model.js";
 
 
   
-export async function getAllRooms(req, res) {
-  
-  Room
-  .find({})
-  .then(docs => {
-      res.status(200).json(docs);
-  })
-  .catch(err => {
-      res.status(500).json({ error: err });
-  });
+  export async function getAllRooms(req, res) {
+    Room.find({})
+        .populate({
+            path: 'messages',
+            populate: {
+                path: 'user',
+                model: 'User'
+            }
+        })
+        .then(docs => {
+            res.status(200).json(docs);
+        })
+        .catch(err => {
+            res.status(500).json({ error: err });
+        });
 }
+
 
 
   
