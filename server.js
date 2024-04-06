@@ -22,6 +22,7 @@ import ioo from 'socket.io-client';
 import { Server } from "socket.io";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
+import WebSocket from 'ws';
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +30,7 @@ const io = new SocketIOServer(server);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const wss = new WebSocket.Server({ server });
 
 
 
@@ -73,14 +75,24 @@ app.use('/room',roomrouter) ;
 
 
 // ... (previous code)
-
 io.on('connection', (socket) => {
-    console.log ('connected')
+    console.log('connected');
 
-    socket.on('joinRoom', (data) => {
+    socket.on('joinRoom', (data, callback) => {
         const { roomId } = data;
-        socket.join(roomId);
-        console.log(`A user joined room: ${roomId}`);
+        // Leave the current room
+        if (socket.roomId) {
+            socket.leave(socket.roomId);
+            console.log(`A user left room: ${socket.roomId}`);
+        }
+        // Join the new room
+        socket.join(roomId, () => {
+            socket.roomId = roomId; // Store the current room ID in socket object
+            console.log(`A user joined room: ${roomId}`);
+            if (typeof callback === 'function') {
+                callback(); // Callback to indicate that room joining is completed
+            }
+        });
     });
 
     socket.on('notification', (msg, callback) => {
@@ -90,27 +102,77 @@ io.on('connection', (socket) => {
             console.log('Received testEvent:', data);
         });
         
-        
         io.emit('testNotification', {
             type: 'new_message',
             message: 'A new message has been added!',
             data: { content: msg }
         });
         
-
         if (typeof callback === 'function') {
             callback();
         }
     });
 
+    //leave room
+    socket.on('leaveRoom', (data, callback) => {
+        const { roomId } = data;
+        if (socket.roomId) {
+            socket.leave(socket.roomId); // Leave the room
+            socket.broadcast.to(roomId).emit('leaveRoom');
+            console.log(`A user left room: ${socket.roomId}`);
+            if (typeof callback === 'function') {
+                callback(); // Callback to indicate that room leaving is completed
+            }
+        }
+    });
+    socket.on('play', (data) => {
+        const { roomId } = data;
+      console.log('play event received');
+      socket.broadcast.to(roomId).emit('play');
+
+      });
+      
+      socket.on('pause', (data) => {
+        const { roomId } = data;
+        console.log('pause event received');
+        socket.broadcast.to(roomId).emit('pause');
+
+      });
+      socket.on('seek', (data) => {
+        const { roomId, seekTo } = data;
+        // Broadcast seek event to all other clients except the sender
+        socket.broadcast.to(roomId).emit('seek', { seekTo });
+      });
+      socket.on('seek-backward', (data) => {
+        const { roomId, seekTo } = data;
+        // Broadcast seek-backward event to all other clients except the sender
+        socket.broadcast.to(roomId).emit('seek-backward', { seekTo });
+      });
+
+      socket.on('stop', (data) => {
+        // Handle the "stop" event here
+        // For example, you can broadcast it to all users in the room
+        const { roomId } = data;
+        socket.broadcast.to(roomId).emit('stop');
+    });
+
+    socket.on('voice-call-request', (data) => {
+        io.emit('voice-call-request', data); // Broadcast the message to all clients
+    });
+      
 
     // Disconnect event
     socket.on('disconnect', () => {
+        if (socket.roomId) {
+            socket.leave(socket.roomId); // Leave the room on disconnect
+            console.log(`A user disconnected from room: ${socket.roomId}`);
+        }
         console.log('A user disconnected');
     });
 });
 
-// ... (remaining code)
+
+
 
 app.post("/addMessage", async (req, res) => {
     try {
@@ -139,6 +201,28 @@ app.post("/addMessage", async (req, res) => {
       return res.status(500).json({ error: "Internal Server Error" });
     }
   });
+
+  wss.on('connection', function connection(ws) {
+    console.log('WebSocket connected');
+  
+    ws.on('message', function incoming(message) {
+      console.log('received: %s', message);
+      // Handle signaling messages for voice call setup
+      // You may need to implement logic to handle SDP offers, answers, ICE candidates, etc.
+    });
+  });
+
+  app.post('/send-voice-call', (req, res) => {
+    // Handle voice call initiation request
+    // Broadcast signaling message to all WebSocket clients
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(req.body));
+      }
+    });
+    res.status(200).send('Voice call request sent successfully');
+  });
+  
   
   
   
