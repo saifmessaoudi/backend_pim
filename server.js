@@ -23,6 +23,8 @@ import { Server } from "socket.io";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
 
+
+
 const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server);
@@ -82,12 +84,21 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         console.log(`A user joined room: ${roomId}`);
     });
+    socket.on('getnotifcationtv', async (userId) => {
+        try {
+            const notifications = await Notification.find({ recipient: userId }).populate('sender');
+            socket.emit('notifications', notifications);
+        } catch (error) {
+            console.error(error);
+        }
+    });
+    
 
     socket.on('notification', (msg, callback) => {
         // Emit the chat message event
         io.emit('chat message', msg);
-        socket.on('testEvent', (data) => {
-            console.log('Received testEvent:', data);
+        socket.on('testEvent', (recipient, roomid) => {
+            console.log('Received testEvent:', recipient, roomid);
         });
         
         
@@ -109,6 +120,8 @@ io.on('connection', (socket) => {
         console.log('A user disconnected');
     });
 });
+
+
 
 // ... (remaining code)
 
@@ -147,7 +160,7 @@ app.post("/addMessage", async (req, res) => {
 app.use("/quiz", quizRouter);
 
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, "0.0.0.0", () => {
     console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
 });
 
