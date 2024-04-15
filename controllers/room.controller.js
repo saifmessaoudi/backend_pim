@@ -326,7 +326,6 @@ export const sendjoinroomfortv = async (req, res) => {
 };
 export async function addRoomInvitationtv(req, res) {
   try {
-    
     const { roomid, recipient } = req.body;
 
     // Vérification de l'existence de la salle et du destinataire
@@ -339,14 +338,10 @@ export async function addRoomInvitationtv(req, res) {
 
     const roomsender = await Room.findOne({ _id: roomid }); 
 
-    // Vérification si l'invitation existe déjà
-    const roomverif = roomsender.roomusersPending.includes(recipient);
+    // Delete existing notification for the same recipient and room
+    await Notification.findOneAndDelete({ recipient: recipient, roomId: roomid });
 
-    /*if (roomverif ) {
-      return res.status(404).json({ message: 'The invitation is already added' });
-    }*/
-
-    // Ajout de l'invitation dans la salle
+    // Ajout de la nouvelle invitation dans la salle
     await Room.findByIdAndUpdate(roomid, { $push: { roomusersPending: recipient } });
 
     // Création de la notification pour le destinataire
@@ -364,20 +359,12 @@ export async function addRoomInvitationtv(req, res) {
   }
 }
 
+
+
 // Import your socket.io instance
 
 export const getnotifcationtv = async (req, res) => {
- /* const { userId } = req.params;
-  try {
-    const notifications = await Notification.find({ recipient: userId }).populate('sender');
-    res.status(200).json(notifications);
 
-    
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }*/
   const { userId } = req.params;
   try {
       const notifications = await Notification.find({ recipient: userId }).populate('sender');
