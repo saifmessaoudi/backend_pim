@@ -2,20 +2,30 @@ import Reclamation from "../models/reclamation.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import User from "../models/user.model.js";
 
-export function createReclamation(req, res) {
+
+export const createReclamation= async(req, res) => {
+  const userId = req.body.userId
+
     if (!req.body.reclamationText) {
       return res.status(400).json({ error: 'Incomplete data for reclamation submission' });
     }
   
+    const currentUser = await User.findById( userId);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const newReclamation = new Reclamation({
         reclamationText: req.body.reclamationText,
-        date: new Date()
+        date: new Date(),
+        user : currentUser
     });
 
   
     newReclamation.save()
-      .then(() => res.status(201).json({ message: 'Reclamation submitted successfully' }))
+      .then(() => res.status(201).json(newReclamation))
       .catch((saveError) => res.status(500).json({ error: saveError.message }));
   }
   export const deleteReclamation = async (req, res) => {
@@ -39,11 +49,20 @@ export function createReclamation(req, res) {
   export const getAllReclamations = async (req, res) => {
     try {
       const reclamations = await Reclamation.find({});
+      
       if (reclamations.length === 0) {
         return res.status(404).json("No reclamations found"); 
       }
-      res.status(200).json(reclamations);
+  
+      // Fetch user objects for each reclamation
+      const reclamationsWithUsers = await Promise.all(reclamations.map(async (reclamation) => {
+        const user = await User.findById(reclamation.user);
+        return { ...reclamation.toObject(), user }; // Merge reclamation and user objects
+      }));
+  
+      res.status(200).json(reclamationsWithUsers);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   };
+  
