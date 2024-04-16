@@ -339,7 +339,7 @@ export async function addRoomInvitationtv(req, res) {
     const roomsender = await Room.findOne({ _id: roomid }); 
 
     // Delete existing notification for the same recipient and room
-    await Notification.findOneAndDelete({ recipient: recipient, roomId: roomid });
+    await Notification.findOneAndDelete({ recipient: recipient });
 
     // Ajout de la nouvelle invitation dans la salle
     await Room.findByIdAndUpdate(roomid, { $push: { roomusersPending: recipient } });
