@@ -140,47 +140,48 @@ export const loginUser = async (req, res) => {
 };
 
 export const loginAdmin = async (req, res) => {
-    const { username, password } = req.body;
-  
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-  
     try {
-      // Recherche de l'administrateur correspondant dans la base de données
-      const admin = await UserModel.findOne({ username, role: 'admin' });
-  
-      if (!admin) {
-        return res.status(401).json({ message: 'Nom d\'utilisateur ou mot de passe incorrect.' });
-      }
-  
-      if (admin.isBanned) {
-        return res.status(403).json({ message: 'Votre compte est banni.' });
-      }
-  
-      const validPassword = await bcrypt.compare(password, admin.password);
-      if (!validPassword) {
-        return res.status(401).json({ message: 'Nom d\'utilisateur ou mot de passe incorrect.' });
-      }
-  
-      const secretKey = process.env.JWT_SECRET || 'defaultSecret';
-      const token = jwt.sign(
-        {
-          userId: admin._id,
-          username: admin.username,
-          email: admin.email,
-          role: admin.role
-        },
-        secretKey,
-        { expiresIn: '1h' }
-      );
-  
-      res.json({ token, user: admin });
+        const { email, username, password } = req.body;
+
+        const user = await UserModel.findOne({
+            $or: [
+                { email: email },
+                { username: username }
+            ]
+        });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'You are not authorized to access this resource' });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const secretKey = process.env.JWT_SECRET || 'defaultSecret';
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+            secretKey,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ token, user });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Erreur interne du serveur.' });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-  };
+};654
+
+
 
 
