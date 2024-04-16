@@ -6,23 +6,18 @@ import router from "./routes/user.routes.js";
 import movierouter from "./routes/movie.routes.js";
 import roomrouter from "./routes/room.routes.js";
 import User from "./models/user.model.js";
-
 import bodyParser from "body-parser";
 import subscriptionRouter from "./routes/subscription.routes.js";
 import planRouter from "./routes/plan.routes.js";
-import ejs from "ejs";
-import path from "path"; 
+import path from "path";
 import connectDB from "./config/connectDB.js";
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import Room from "./models/room.model.js";
-import ioo from 'socket.io-client';
-import { Server } from "socket.io";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
-import WebSocket from 'ws';
 
 const app = express();
 const server = http.createServer(app);
@@ -30,18 +25,11 @@ const io = new SocketIOServer(server);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const wss = new WebSocket.Server({ server });
-
-
-
-
-
 
 // Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Serve the 'index.html' file when the root URL is accessed
-
 
 // Load environment variables
 dotenv.config();
@@ -56,11 +44,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan("dev"));
 app.use("/img", express.static("public/images"));
-app.use(cors(
-    {
-        credentials: true,
-    }
-));
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 app.use(express.static("public"));
 
 app.use("/movies", movierouter);
@@ -68,11 +56,10 @@ app.use("/user", router);
 app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
-app.use("/reclamation",reclamationRouter );
+app.use("/reclamation", reclamationRouter);
 app.use(cors());
 
-app.use('/room',roomrouter) ; 
-
+app.use("/room", roomrouter);
 
 // ... (previous code)
 io.on('connection', (socket) => {
@@ -156,9 +143,7 @@ io.on('connection', (socket) => {
         socket.broadcast.to(roomId).emit('stop');
     });
 
-    socket.on('voice-call-request', (data) => {
-        io.emit('voice-call-request', data); // Broadcast the message to all clients
-    });
+   
       
 
     // Disconnect event
@@ -202,26 +187,8 @@ app.post("/addMessage", async (req, res) => {
     }
   });
 
-  wss.on('connection', function connection(ws) {
-    console.log('WebSocket connected');
-  
-    ws.on('message', function incoming(message) {
-      console.log('received: %s', message);
-      // Handle signaling messages for voice call setup
-      // You may need to implement logic to handle SDP offers, answers, ICE candidates, etc.
-    });
-  });
 
-  app.post('/send-voice-call', (req, res) => {
-    // Handle voice call initiation request
-    // Broadcast signaling message to all WebSocket clients
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(req.body));
-      }
-    });
-    res.status(200).send('Voice call request sent successfully');
-  });
+ 
   
   
   
@@ -230,15 +197,10 @@ app.post("/addMessage", async (req, res) => {
 
 app.use("/quiz", quizRouter);
 
-
 server.listen(process.env.PORT, () => {
-    console.log(`Server is running ${process.env.HOST} on port ${process.env.PORT}`);
+  console.log(
+    `Server is running ${process.env.HOST} on port ${process.env.PORT}`
+  );
 });
 
-
-
-
-
-
-
-export { io }; 
+export { io };
