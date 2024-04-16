@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import movie from "../models/movie.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/mailer.js";
@@ -591,21 +592,26 @@ export const getById = async (req, res) => {
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { username, firstName, lastName, birthDate, bio } = req.body;
+  
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(404).send(`No user with id: ${id}`);
+  
   const updatedUser = {
     username,
     firstName,
     lastName,
     birthDate,
-    bio,
-    profilePicture: `${req.protocol}://${req.get("host")}/img/${
-      req.file.filename
-    }`,
+    bio
   };
+
+  if (req.file) {
+    updatedUser.profilePicture = `${req.protocol}://${req.get("host")}/img/${req.file.filename}`;
+  }
+
   await User.findByIdAndUpdate(id, updatedUser, { new: true });
   res.json(updatedUser);
 };
+
 
 export const updatePassword = async (req, res) => {
   try {
@@ -681,8 +687,9 @@ export async function addInvitation(req, res) {
 
            const senderverif = Usersender.friendRequestsSent.includes(recipient);
            const recipientverif = Userrecipient.friendRequests.includes(sender);
+
      
-        if ( senderverif || recipientverif) {
+        if ( senderverif || recipientverif || Usersender.friends.includes(recipient) || Userrecipient.friends.includes(sender)){
             return res.status(404).json({ message: 'the invitation is already added' });
         }
 
@@ -948,3 +955,108 @@ export const selectedroulette = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+export const stastverifiedaccount = async (req, res) => {
+try {
+  const verifiedUsersCount = await  User.countDocuments({ isVerified: true });
+  const inverseUsersCount = await User.countDocuments({ isVerified: false });
+  res.json({verifiedUsersCount, inverseUsersCount });
+
+}catch (error) {
+  res.status(500).json({ error: error.message });
+}
+};
+export const findusersfriend = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const friendIds = user.friends;
+    const friends = [];
+    
+    for (const friendId of friendIds) {
+      const friend = await User.findById(friendId);
+      
+      if (!friend) {
+        console.error(`Friend with ID ${friendId} not found`);
+        // Skip this friend and continue with the loop
+        continue;
+      }
+      
+      friends.push(friend);
+    }
+    const nbrfriends = friends.length;
+    
+    res.status(200).json({friends, nbrfriends});
+  } catch (error) {
+    console.error("Error finding user's friends:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getuserbyusername = async (req, res) => {
+  try {
+    const username = req.params.username;
+    const user = await User.findOne ({ username });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  }
+  catch (error) {
+    console.error("Error finding user by username:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const findusersfriendbyusername = async (req, res) => {
+  try {
+    const username = req.params.username;
+    const user = await User.findOne ({ username });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const friendIds = user.friends;
+      const friends = [];
+      
+      for (const friendId of friendIds) {
+        const friend = await User.findById(friendId);
+        
+        if (!friend) {
+          console.error(`Friend with ID ${friendId} not found`);
+          // Skip this friend and continue with the loop
+          continue;
+        }
+        
+        friends.push(friend);
+      }
+      const nbrfriends = friends.length;
+      
+      res.status(200).json({friends, nbrfriends});
+    } catch (error) {
+      console.error("Error finding user's friends:", error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+  export const getGenreFilm = async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        // Assuming there's a 'User' model
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Assuming there's a 'Film' model and the films are stored in a field like 'favoriteFilms' in the user schema
+        const films = await movie.find({ _id: { $in: user.favouriteMovies } });
+
+        return res.status(200).json({ films });
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+

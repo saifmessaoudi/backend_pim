@@ -90,3 +90,19 @@ export const verifyUserStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+export const getSubscriptionStatsByDay = async (req, res) => {
+  try {
+      const subscriptionstats = await Subscription.aggregate([
+        {$group:{
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$startDate" } },
+          count: { $sum: 1 }
+        }}
+      ]);
+      res.json({ subscriptionstats})
+
+  } catch (error) { 
+    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error(error);
+  }
+  
+};
