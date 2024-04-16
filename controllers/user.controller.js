@@ -592,21 +592,26 @@ export const getById = async (req, res) => {
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { username, firstName, lastName, birthDate, bio } = req.body;
+  
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(404).send(`No user with id: ${id}`);
+  
   const updatedUser = {
     username,
     firstName,
     lastName,
     birthDate,
-    bio,
-    profilePicture: `${req.protocol}://${req.get("host")}/img/${
-      req.file.filename
-    }`,
+    bio
   };
+
+  if (req.file) {
+    updatedUser.profilePicture = `${req.protocol}://${req.get("host")}/img/${req.file.filename}`;
+  }
+
   await User.findByIdAndUpdate(id, updatedUser, { new: true });
   res.json(updatedUser);
 };
+
 
 export const updatePassword = async (req, res) => {
   try {
@@ -682,8 +687,9 @@ export async function addInvitation(req, res) {
 
            const senderverif = Usersender.friendRequestsSent.includes(recipient);
            const recipientverif = Userrecipient.friendRequests.includes(sender);
+
      
-        if ( senderverif || recipientverif) {
+        if ( senderverif || recipientverif || Usersender.friends.includes(recipient) || Userrecipient.friends.includes(sender)){
             return res.status(404).json({ message: 'the invitation is already added' });
         }
 
