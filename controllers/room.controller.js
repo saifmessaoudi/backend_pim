@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import Room from "../models/room.model.js";
 import User from "../models/user.model.js";
-
-
+import Notification from "../models/notificationtv.model.js";
+import { io } from '../server.js';
+;
 
   export async function addRoom(req, res) {
     try {
@@ -288,3 +289,103 @@ export async function deleteOwnerAccess(req, res) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+export const getroombyid = async (req, res) => {
+  const { roomId } = req.params;
+  try {
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+    res.status(200).json(room);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const sendjoinroomfortv = async (req, res) => {
+  try {
+    const { roomId, userId } = req.body; // Supposons que vous recevez l'ID de la salle et l'ID de l'utilisateur dans le corps de la requête
+
+    // Vérifier si la salle et l'utilisateur existent
+    const roomExists = await Room.exists({ _id: roomId });
+    const userExists = await User.exists({ _id: userId });
+
+    if (!roomExists || !userExists) {
+      return res.status(404).json({ message: 'Room or user does not exist' });
+    }
+
+    // Ajouter l'utilisateur à la salle avec la télévision
+    await Room.findByIdAndUpdate(roomId, { $push: { roomusers: userId } });
+
+    res.status(200).json({ message: 'User successfully joined room with TV' });
+  } catch (error) {
+    console.error('Error joining room with TV:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+export async function addRoomInvitationtv(req, res) {
+  try {
+    const { roomid, recipient } = req.body;
+
+    // Vérification de l'existence de la salle et du destinataire
+    const roomExists = await Room.exists({ _id: roomid });
+    const recipientExists = await User.exists({ _id: recipient });
+
+    if (!roomExists || !recipientExists) {
+      return res.status(404).json({ message: 'Room or recipient does not exist' });
+    }
+
+    const roomsender = await Room.findOne({ _id: roomid }); 
+
+    // Delete existing notification for the same recipient and room
+    await Notification.findOneAndDelete({ recipient: recipient });
+
+    // Ajout de la nouvelle invitation dans la salle
+    await Room.findByIdAndUpdate(roomid, { $push: { roomusersPending: recipient } });
+
+    // Création de la notification pour le destinataire
+    const newNotification = new Notification({
+      recipient: recipient,
+      sender: roomsender.userowner,
+      message: `You have been invited to join the room "${roomsender.title}"`,
+      roomId: roomid
+    });
+    await newNotification.save();
+    res.status(201).json({ message: 'Invitation created successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
+
+// Import your socket.io instance
+
+export const getnotifcationtv = async (req, res) => {
+
+  const { userId } = req.params;
+  try {
+      const notifications = await Notification.find({ recipient: userId }).populate('sender');
+      
+      // Si aucune notification n'est disponible immédiatement, attendez jusqu'à ce qu'une nouvelle notification soit ajoutée à la base de données
+      if (notifications.length === 0) {
+          await new Promise(resolve => {
+              Notification.watch().on('change', async change => {
+                  if (change.operationType === 'insert') {
+                      const newNotification = await Notification.findById(change.documentKey._id).populate('sender');
+                      res.json([newNotification]);
+                      resolve();
+                  }
+              });
+          });
+      } else {
+          res.json(notifications);
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+

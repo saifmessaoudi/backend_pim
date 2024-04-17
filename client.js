@@ -10,5 +10,8 @@ socket.on('connect', () => {
     socket.on('connection', (data) => {
         console.log('Received testNotification:', data);
     });
+    socket.on('testNotification', (data) => {
+        console.log('Received testNotification:', data);
+    });
 });
 // Add more event listeners or emit events as needed
