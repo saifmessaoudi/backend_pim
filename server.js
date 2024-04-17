@@ -18,6 +18,7 @@ import { dirname } from "path";
 import Room from "./models/room.model.js";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
+import naughtyWords from "naughty-words";
 
 const app = express();
 const server = http.createServer(app);
@@ -159,9 +160,13 @@ io.on('connection', (socket) => {
 
 
 
+
+
 app.post("/addMessage", async (req, res) => {
+
     try {
-      const { roomId, senderId, content } = req.body;
+      let { content } = req.body;
+      const { roomId, senderId } = req.body;
   
       if (!roomId || !senderId || !content) {
         return res.status(400).json({ error: "Missing required parameters" });
@@ -171,6 +176,11 @@ app.post("/addMessage", async (req, res) => {
       if (!room) {
         return res.status(404).json({ error: "Room not found" });
       }
+
+      if (naughtyWords.en.includes(content) || naughtyWords.fr.includes(content)) {
+        content = "****";
+        }
+      
   
       const timestamp = new Date(); // Get current timestamp
       const user = await User.findById(senderId); // Fetch user information
