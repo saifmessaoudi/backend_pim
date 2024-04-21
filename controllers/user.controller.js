@@ -1060,3 +1060,50 @@ export const findusersfriendbyusername = async (req, res) => {
     }
 };
 
+export const savelocation = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { latitude, longitude } = req.body;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    user.location = { type: "Point", coordinates: [longitude, latitude] };
+    await user.save();
+    res.status(200).json({ message: "Location saved successfully" });
+  }
+  catch (error) {
+    console.error("Error saving location:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const getlocation = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("location");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user.location);
+  }catch (error) {
+    console.error("Error getting location:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const getAllLocations = async (req, res) => {
+  try {
+    // Trouver tous les utilisateurs qui ont un champ 'location' défini
+    const usersWithLocation = await User.find(
+      { "location.coordinates": { $exists: true } }, // Trouver les utilisateurs avec des coordonnées
+      { location: 1 } // Seules les locations sont nécessaires dans le résultat
+    );
+
+    // Récupérer les locations
+    const locations = usersWithLocation.map((user) => user.location);
+
+    res.status(200).json({ locations });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des locations:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

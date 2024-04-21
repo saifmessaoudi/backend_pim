@@ -9,7 +9,7 @@ import { registerUser,loginUser,verifyEmail,loginUser1 } from '../controllers/Au
 import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,stastverifiedaccount} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
-import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';
+import  {getAllLocations,savelocation,getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';
 import  {addMovieGenders,deleteMovieGenders,getGendersById,findusersfriend,getuserbyusername,findusersfriendbyusername} from '../controllers/user.controller.js';
 
 const router = Router();
@@ -97,8 +97,10 @@ router.delete('/deleteUser/:username', deleteUser);
    .patch(refuseInvitation)
    router.route('/getfriendsrequests/:recipient')
    .get(getfriendsRequest) 
-    
-
+   router.get('/location/:userId', savelocation);
+   router.get('/locations/all', getAllLocations);
+   
+    router.put('/location/:userId', savelocation);
    router.delete('/deleteUser/:username', deleteUser);
    router.get('/test/:username',getuserbyusername);
    router.get("/users",getAllUsersAdmin);

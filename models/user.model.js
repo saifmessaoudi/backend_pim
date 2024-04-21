@@ -13,6 +13,19 @@ const userSchema = new mongoose.Schema(
       role : { type: String, default: "user"},
       birthDate : { type: Date},
       bio : { type: String},
+      latitude: { type: Number },
+      longitude: { type: Number },
+      location: {
+        type: {
+          type: String,
+          enum: ["Point"],
+          required: true,
+        },
+        coordinates: {
+          type: [Number], 
+          required: true,
+        },
+      },
     
       profilePicture : { type: String , default: "https://louisville.edu/enrollmentmanagement/images/person-icon/image"},
       friends : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
