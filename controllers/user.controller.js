@@ -1095,13 +1095,15 @@ export const getAllLocations = async (req, res) => {
     // Trouver tous les utilisateurs qui ont un champ 'location' défini
     const usersWithLocation = await User.find(
       { "location.coordinates": { $exists: true } }, // Trouver les utilisateurs avec des coordonnées
-      { location: 1 } // Seules les locations sont nécessaires dans le résultat
+      { location: 1,username: 1 } // Seules les locations sont nécessaires dans le résultat
     );
 
     // Récupérer les locations
-    const locations = usersWithLocation.map((user) => user.location);
-
-    res.status(200).json({ locations });
+    const userLocations = usersWithLocation.map((user) => ({
+      username: user.username,
+      location: user.location,
+    }));
+    res.status(200).json({ userLocations });
   } catch (error) {
     console.error("Erreur lors de la récupération des locations:", error);
     res.status(500).json({ error: error.message });
