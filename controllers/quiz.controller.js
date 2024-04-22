@@ -1,18 +1,97 @@
 import mongoose from "mongoose";
 import { validationResult } from "express-validator";
 import Quiz from "../models/quiz.model.js";
+import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export function addQuiz(req, res) {
+export async function addQuiz(req, res) {
+  // Validate the request
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
-  Quiz.create(req.body)
-    .then((newQuiz) => {
-      res.status(201).json(newQuiz);
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    });
+  const movie = req.body.movie;
+  const categories=req.body.category;
+  // Check if the API key is available
+  const apiKey = process.env.GEMINI_API;
+  if (!apiKey) {
+    throw new Error("Missing API key (process.env.GEMINI_API)");
+  }
+
+  // Create a GoogleGenerativeAI instance
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  // Loop to generate multiple quizzes
+  
+    // Your movie variable is not defined here, make sure it's defined before using it
+    // Generate the prompt
+    const prompt = `Generate  quiz question for the movie "${movie}". The question should be formulated as follows:
+    "Question goes here?"
+    Provide four possible answers separated by underscores, and enclose the correct answer in double parentheses. For example: [Answer1_Answer2_Answer3_((CorrectAnswer))]`;
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+        console.log(text);
+
+    // Define regular expressions
+    const questionRegex = /"([^"]+)"/;
+    const answersRegex = /\[([^\]]+)\]/;
+    const correctAnswerRegex = /\(\(([^\)]+)\)\)/;
+    
+
+    // Extract the question, answers, and correct answer
+    const questionMatch = text.match(questionRegex);
+    const answersMatch = text.match(answersRegex);
+    const correctAnswerMatch = text.match(correctAnswerRegex);
+
+    // Output the results (optional)
+    const question = questionMatch ? questionMatch[1] : null;
+    const answers = answersMatch ? answersMatch[1].split("_") : [];
+    const correctAnswer = correctAnswerMatch ? correctAnswerMatch[1] : null;
+
+    //verifier si la question est nulle
+    /*
+    if (!question) {
+      console.log("Error: Question is null, skipping quiz creation");
+      return; // Exit the function
+    }
+    */
+
+    // Log the extracted quiz (optional)
+    console.log("Question:", question);
+    console.log("Answers:", answers);
+    console.log("Correct Answer:", correctAnswer);
+
+    // Create a new quiz document in the database
+    const newQuiz = {
+      categorie: categories, // Replace with actual categories
+      questions: [
+        {
+          question: question,
+          answers: answers.map((answer, index) => ({
+            answer: answer,
+            isCorrect: index === answers.indexOf(correctAnswer),
+          })),
+        },
+      ],
+      winningPoints: 10, // Replace with actual winning points
+    };
+
+    // Save the new quiz
+    try {
+      const savedQuiz = await Quiz.create(newQuiz);
+      console.log("New quiz created:", savedQuiz);
+    } catch (error) {
+      console.error("Error creating quiz:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    // You might want to add a condition to break the loop after generating a certain number of quizzes
+  
+
+  // Return a success response
+  return res.status(201).json({ message: "Quizzes created successfully" });
 }
 
 export function deleteQuiz(req, res) {

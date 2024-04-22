@@ -58,6 +58,7 @@ app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
 app.use("/reclamation", reclamationRouter);
+app.use('/quiz',quizRouter); 
 app.use(cors());
 
 app.use("/room", roomrouter);
@@ -196,14 +197,6 @@ app.post("/addMessage", async (req, res) => {
       return res.status(500).json({ error: "Internal Server Error" });
     }
   });
-
-
- 
-  
-  
-  
-  
-
 
 app.use("/quiz", quizRouter);
 
