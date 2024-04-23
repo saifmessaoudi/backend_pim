@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addRoom,addRoomInvitation,deleteRoomInvitation,getAllRooms,addaUserAccess,deleteUserAccess,addChatAccess,deleteChatAccess,addOwnerAccess,deleteOwnerAccess} from '../controllers/room.controller.js';
+import { getnotifcationtv,addRoomInvitationtv,addRoom,getroombyid,addRoomInvitation,deleteRoomInvitation,getAllRooms,addaUserAccess,deleteUserAccess,addChatAccess,deleteChatAccess,addOwnerAccess,deleteOwnerAccess} from '../controllers/room.controller.js';
 
 const roomrouter = Router();
 
@@ -23,6 +23,10 @@ roomrouter.route('/deleteroominvitation')
 
 roomrouter.route('/getRooms')
 .get(getAllRooms)
+roomrouter.route('/getroom/:roomId')
+.get(getroombyid)
+roomrouter.route('/getnotif/:userId')
+.get(getnotifcationtv)
 
 roomrouter.route('/addAccess')
 .patch(addaUserAccess)
@@ -36,6 +40,9 @@ roomrouter.route('/addChatAccess')
 .patch(addChatAccess)
 roomrouter.route('/deleteChataccess')
 .patch(deleteChatAccess)
+roomrouter.post('/join-room-tv', addRoomInvitationtv);
+
+
 
 
 export default  roomrouter;

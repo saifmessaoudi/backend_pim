@@ -20,6 +20,8 @@ import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
 import naughtyWords from "naughty-words";
 
+
+
 const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server);
@@ -83,12 +85,21 @@ io.on('connection', (socket) => {
             }
         });
     });
+    socket.on('getnotifcationtv', async (userId) => {
+        try {
+            const notifications = await Notification.find({ recipient: userId }).populate('sender');
+            socket.emit('notifications', notifications);
+        } catch (error) {
+            console.error(error);
+        }
+    });
+    
 
     socket.on('notification', (msg, callback) => {
         // Emit the chat message event
         io.emit('chat message', msg);
-        socket.on('testEvent', (data) => {
-            console.log('Received testEvent:', data);
+        socket.on('testEvent', (recipient, roomid) => {
+            console.log('Received testEvent:', recipient, roomid);
         });
         
         io.emit('testNotification', {
