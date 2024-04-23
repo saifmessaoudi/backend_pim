@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
-import { registerUser,loginUser,verifyEmail,loginUser1 } from '../controllers/AuthController.js';
+import { registerUser,loginUser,verifyEmail,loginUser1,loginAdmin} from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,stastverifiedaccount} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
@@ -62,6 +62,7 @@ router.get('/verify/:token', verifyEmail);
     router.put("/update/:id",upload , updateUser);
 router.post('/login', loginUser);
 router.post('/login1', loginUser1);
+router.post('/login-admin', loginAdmin);
 router.get("/users" , getAllUsers);
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)

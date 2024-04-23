@@ -1060,6 +1060,8 @@ export const findusersfriendbyusername = async (req, res) => {
     }
 };
 
+
+
 export const savelocation = async (req, res) => {
   try {
     const { userId } = req.params;
