@@ -348,7 +348,7 @@ export async function addRoomInvitationtv(req, res) {
     const newNotification = new Notification({
       recipient: recipient,
       sender: roomsender.userowner,
-      message: `You have been invited to join the room "${roomsender.title}"`,
+      message: `You Can Join to Room Name "${roomsender.title}"`,
       roomId: roomid
     });
     await newNotification.save();
