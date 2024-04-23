@@ -34,7 +34,29 @@ import User from "../models/user.model.js";
   };
 
 
+  export async function deleteRoom(req, res) {
+    try {
+      
+        const { roomId } = req.body;
+        
+       
+        if (!roomId) {
+            return res.status(400).json({ message: 'Room ID is required' });
+        }
+        const room = await Room.findById({ _id: roomId });
+       
+        const deletedRoom = await Room.findByIdAndDelete(roomId);
 
+        if (!deletedRoom) {
+            return res.status(404).json({ message: 'Room not found' });
+        }
+
+        res.status(201).json(room); 
+      } catch (error) {
+        console.error('Error deleting room:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
 
 
   export async function addRoomInvitation(req, res) {
