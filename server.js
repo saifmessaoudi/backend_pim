@@ -19,6 +19,7 @@ import Room from "./models/room.model.js";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
 import naughtyWords from "naughty-words";
+import setupSocket from "./config/configSocket.js";
 
 
 
@@ -62,116 +63,10 @@ app.use("/plan", planRouter);
 app.use("/reclamation", reclamationRouter);
 app.use(cors());
 
+app.use("/quiz", quizRouter);
 app.use("/room", roomrouter);
 
-// ... (previous code)
-io.on('connection', (socket) => {
-    console.log('connected');
-
-    socket.on('joinRoom', (data, callback) => {
-        const { roomId } = data;
-        // Leave the current room
-        if (socket.roomId) {
-            socket.leave(socket.roomId);
-            console.log(`A user left room: ${socket.roomId}`);
-        }
-        // Join the new room
-        socket.join(roomId, () => {
-            socket.roomId = roomId; // Store the current room ID in socket object
-            console.log(`A user joined room: ${roomId}`);
-            if (typeof callback === 'function') {
-                callback(); // Callback to indicate that room joining is completed
-            }
-        });
-    });
-    socket.on('getnotifcationtv', async (userId) => {
-        try {
-            const notifications = await Notification.find({ recipient: userId }).populate('sender');
-            socket.emit('notifications', notifications);
-        } catch (error) {
-            console.error(error);
-        }
-    });
-    
-
-    socket.on('notification', (msg, callback) => {
-        // Emit the chat message event
-        io.emit('chat message', msg);
-        socket.on('testEvent', (recipient, roomid) => {
-            console.log('Received testEvent:', recipient, roomid);
-        });
-        
-        io.emit('testNotification', {
-            type: 'new_message',
-            message: 'A new message has been added!',
-            data: { content: msg }
-        });
-        
-        if (typeof callback === 'function') {
-            callback();
-        }
-    });
-
-    //leave room
-    socket.on('leaveRoom', (data, callback) => {
-        const { roomId } = data;
-        if (socket.roomId) {
-            socket.leave(socket.roomId); // Leave the room
-            socket.broadcast.to(roomId).emit('leaveRoom');
-            console.log(`A user left room: ${socket.roomId}`);
-            if (typeof callback === 'function') {
-                callback(); // Callback to indicate that room leaving is completed
-            }
-        }
-    });
-    socket.on('play', (data) => {
-        const { roomId } = data;
-      console.log('play event received');
-      socket.broadcast.to(roomId).emit('play');
-
-      });
-      
-      socket.on('pause', (data) => {
-        const { roomId } = data;
-        console.log('pause event received');
-        socket.broadcast.to(roomId).emit('pause');
-
-      });
-      socket.on('seek', (data) => {
-        const { roomId, seekTo } = data;
-        // Broadcast seek event to all other clients except the sender
-        socket.broadcast.to(roomId).emit('seek', { seekTo });
-      });
-      socket.on('seek-backward', (data) => {
-        const { roomId, seekTo } = data;
-        // Broadcast seek-backward event to all other clients except the sender
-        socket.broadcast.to(roomId).emit('seek-backward', { seekTo });
-      });
-
-      socket.on('stop', (data) => {
-        // Handle the "stop" event here
-        // For example, you can broadcast it to all users in the room
-        const { roomId } = data;
-        socket.broadcast.to(roomId).emit('stop');
-    });
-
-   
-      
-
-    // Disconnect event
-    socket.on('disconnect', () => {
-        if (socket.roomId) {
-            socket.leave(socket.roomId); // Leave the room on disconnect
-            console.log(`A user disconnected from room: ${socket.roomId}`);
-        }
-        console.log('A user disconnected');
-    });
-});
-
-
-
-
-
+setupSocket(io);
 
 app.post("/addMessage", async (req, res) => {
 
@@ -209,14 +104,6 @@ app.post("/addMessage", async (req, res) => {
   });
 
 
- 
-  
-  
-  
-  
-
-
-app.use("/quiz", quizRouter);
 
 server.listen(process.env.PORT, () => {
   console.log(
