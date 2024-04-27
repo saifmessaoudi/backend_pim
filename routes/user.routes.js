@@ -5,11 +5,11 @@ import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
-import { registerUser,loginUser,verifyEmail,loginAdmin} from '../controllers/AuthController.js';
+import { registerUser,loginUser,verifyEmail,loginUser1,loginAdmin } from '../controllers/AuthController.js';
 import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,stastverifiedaccount} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
-import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';
+import  {getAllLocations,savelocation,getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';
 import  {addMovieGenders,deleteMovieGenders,getGendersById,findusersfriend,getuserbyusername,findusersfriendbyusername} from '../controllers/user.controller.js';
 
 const router = Router();
@@ -61,7 +61,7 @@ router.post('/register', [
 router.get('/verify/:token', verifyEmail);
     router.put("/update/:id",upload , updateUser);
 router.post('/login', loginUser);
-router.post('/login-admin', loginAdmin);
+router.post('/login-admin',loginAdmin);
 router.get("/users" , getAllUsers);
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
@@ -97,8 +97,10 @@ router.delete('/deleteUser/:username', deleteUser);
    .patch(refuseInvitation)
    router.route('/getfriendsrequests/:recipient')
    .get(getfriendsRequest) 
-    
-
+   router.get('/location/:userId', savelocation);
+   router.get('/locations/all', getAllLocations);
+   
+    router.put('/location/:userId', savelocation);
    router.delete('/deleteUser/:username', deleteUser);
    router.get('/test/:username',getuserbyusername);
    router.get("/users",getAllUsersAdmin);

@@ -203,4 +203,26 @@ export const getById = async (req, res) => {
             return res.status(500).json({ message: 'Server error' });
         }
     };
+    export const getAllMovies = async (req, res) => {
+        try {
+            const movies = await Movie.find();
+            res.status(200).json(movies);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    export const getmoviebytitle = async (req, res) => {
+        const { title } = req.params;
+        try {
+            const movie = await Movie.findOne({ title: title }); // Search by the title field
+            if (!movie) {
+                return res.status(404).json({ message: 'Movie not found' });
+            }
+            res.status(200).json(movie);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    };
     
