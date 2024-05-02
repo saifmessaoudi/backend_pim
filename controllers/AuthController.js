@@ -177,6 +177,51 @@ export const loginUser1 = async (req, res) => {
         );
     
 
+export const loginAdmin = async (req, res) => {
+    try {
+        const { email, username, password } = req.body;
+
+        const user = await UserModel.findOne({
+            $or: [
+                { email: email },
+                { username: username }
+            ]
+        });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+      
+        if (!user.role.toLowerCase().includes('admin')) {
+            return res.status(403).json({ message: 'You are not authorized to access this resource' });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const secretKey = process.env.JWT_SECRET || 'defaultSecret';
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+            secretKey,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ token, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+
 
         
         res.json({ token, user });

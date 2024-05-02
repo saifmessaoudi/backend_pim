@@ -22,6 +22,7 @@ import naughtyWords from "naughty-words";
 import setupSocket from "./config/configSocket.js";
 
 
+import routerTask from "./routes/task.routes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -56,6 +57,7 @@ app.use(
 app.use(express.static("public"));
 
 app.use("/movies", movierouter);
+app.use("/task" , routerTask);
 app.use("/user", router);
 app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
