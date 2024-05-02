@@ -106,3 +106,68 @@ export const getSubscriptionStatsByDay = async (req, res) => {
   }
   
 };
+export const getSubscriptionrevenue = async (req, res) => {
+  try {
+    const subscriptionRevenue = await Subscription.aggregate([
+      {
+        $lookup: {
+          from: 'plans', // name of the collection for Plan
+          localField: 'plan', // field in Subscription to join on
+          foreignField: '_id', // field in Plan to join on
+          as: 'planDetails', // alias for the joined data
+        },
+      },
+      {
+        $unwind: '$planDetails', // flatten the array to get individual plan details
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$startDate" } },
+          totalRevenue: { $sum: '$planDetails.price' }, // sum the prices
+        },
+      
+      },
+      {
+        $sort: { _id: 1 }, // optional: sort by date
+      },
+    ]);
+
+    res.json({ success: true, data: subscriptionRevenue });
+
+  } catch (error) {
+    console.error("Error in getSubscriptionRevenue:", error); // log the error for debugging
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+  
+};
+export const getTotalSubscriptionRevenue = async (req, res) => {
+  try {
+    const totalRevenue = await Subscription.aggregate([
+      {
+        $lookup: {
+          from: 'plans', // name of the collection for Plan
+          localField: 'plan', // field in Subscription to join on
+          foreignField: '_id', // field in Plan to join on
+          as: 'planDetails', // alias for the joined data
+        },
+      },
+      {
+        $unwind: '$planDetails', // flatten to get individual plan details
+      },
+      {
+        $group: {
+          _id: null, // No grouping key; all results combined
+          totalRevenue: { $sum: '$planDetails.price' }, // sum all prices
+        },
+      },
+    ]);
+
+    const revenue = totalRevenue[0] ? totalRevenue[0].totalRevenue : 0; // Get the total revenue
+    res.json({ success: true, totalRevenue: revenue }); // Respond with the total revenue
+
+  } catch (error) {
+    console.error("Error in getTotalSubscriptionRevenue:", error); // Log errors for debugging
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+

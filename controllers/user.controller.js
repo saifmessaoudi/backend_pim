@@ -7,6 +7,7 @@ import { OAuth2Client } from "google-auth-library";
 import mongoose from "mongoose"
 import { io } from "../server.js";
 import generateVerificationToken from '../controllers/generateVerificationToken.js';
+import { validationResult } from 'express-validator';
 
 
 
