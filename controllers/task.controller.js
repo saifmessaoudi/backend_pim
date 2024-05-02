@@ -102,7 +102,9 @@ export const getTasksByRecipe = async (req, res) => {
         const { userId } = req.params;
 
         // Vérifier si l'ID fourni est un ObjectId valide
-       
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
 
         // Recherche de toutes les tâches avec le champ 'recipient' correspondant à l'ID de l'utilisateur
         const tasks = await Task.find({ recipient: userId });

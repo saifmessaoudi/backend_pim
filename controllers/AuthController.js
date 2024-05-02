@@ -153,8 +153,8 @@ export const loginAdmin = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
-
-        if ((user.role !== 'admin') || (user.role !== 'superadmin')) {
+      
+        if (!user.role.toLowerCase().includes('admin')) {
             return res.status(403).json({ message: 'You are not authorized to access this resource' });
         }
 
