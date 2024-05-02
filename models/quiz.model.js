@@ -12,7 +12,6 @@ const quizSchema = new Schema({
     {
       question: {
         type: String,
-        required: true,
       },
       answers: [
         {
@@ -24,14 +23,16 @@ const quizSchema = new Schema({
             type: Boolean,
             required: true,
           },
-          winningPoints: {
-            type: Number,
-            required: true,
-          },
+         
         },
       ],
+    
     },
   ],
+  winningPoints: {
+    type: Number,
+    required: true,
+  },
 
   date: {
     type: Date,
