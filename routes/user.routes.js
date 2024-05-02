@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { acceptInvitation, getfriendsRequest, refuseInvitation  } from "../controllers/user.controller.js";
+import { acceptInvitation, getfriendsRequest, refuseInvitation ,addAdmin } from "../controllers/user.controller.js";
 import { banUser, getAllUsersAdmin, getUserById, sendPasswordResetEmail , unbanUser, verifyUserWithGoogle } from "../controllers/user.controller.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
@@ -109,4 +109,5 @@ router.delete('/deleteUser/:username', deleteUser);
   router.get('/:username/genres', getGenreFilm);
   router.get('/friends/:username', findusersfriendbyusername);
   router.get('/role/admin', getAdmins);
+  router.post('/addAdmin', addAdmin);
   export default  router;

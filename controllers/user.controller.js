@@ -6,6 +6,7 @@ import sendEmail from "../utils/mailer.js";
 import { OAuth2Client } from "google-auth-library";
 import mongoose from "mongoose"
 import { io } from "../server.js";
+import generateVerificationToken from '../controllers/generateVerificationToken.js';
 
 
 
@@ -1076,6 +1077,48 @@ export const getAdmins = async (req, res) => {
       console.error(error);
       res.status(500).json({ message: 'Internal server error' });
   }
+};
+export const addAdmin = async (req, res) => {
+  try {
+    const { username, password, email } = req.body;
+
+        const existingUser = await User.findOne({ username });
+        const existing = await User.findOne({ email });
+
+        if (existingUser && existing) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            username: req.body.username,
+            email: req.body.email,
+            password: hashedPassword,
+            role : "admin"
+        });
+
+        const user = await newUser.save();
+
+        const authToken = jwt.sign(
+            { username: user.username, id: user._id },
+            process.env.JWT_KEY,
+            { expiresIn: "1h" }
+        );
+
+        const verificationToken = generateVerificationToken();
+        newUser.verificationToken = verificationToken;
+        await newUser.save();
+
+        const verificationLink = `${process.env.BASE_URL}/verify/${verificationToken}`;
+        const emailSubject = 'Email Verification';
+        const emailHtml = `Click the following link to verify your email: <a href="${verificationLink}">Verify Email</a>`;
+        await sendEmail(newUser.email, emailSubject, emailHtml);
+
+        res.status(200).json({ user: newUser, authToken, message: 'User registered successfully. Please check your email for verification.' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 
