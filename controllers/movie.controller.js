@@ -225,4 +225,24 @@ export const getById = async (req, res) => {
             res.status(500).json({ message: 'Internal server error' });
         }
     };
+    export const moviesStatsparRapportRating = async (req, res) => {
+       
+        try {
+            const movies = await Movie.find();
+            const moviesStats = movies.map(movie => {
+                const ratingsSum = movie.rating.reduce((acc, rating) => acc + rating.rating, 0);
+                const ratingsCount = movie.rating.length;
+                const averageRating = ratingsCount > 0 ? ratingsSum / ratingsCount : 0;
+                return {
+                    title: movie.title,
+                    averageRating: averageRating,
+                    ratingsCount: ratingsCount
+                };
+            });
+            res.status(200).json(moviesStats);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    };
     
