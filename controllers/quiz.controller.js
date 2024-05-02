@@ -25,14 +25,16 @@ export async function addQuiz(req, res) {
   
     // Your movie variable is not defined here, make sure it's defined before using it
     // Generate the prompt
-    const prompt = `Generate  quiz question for the movie "${movie}". The question should be formulated as follows:
+    const prompt = `Generate one quiz question for the movie "${movie}". The question should be formulated as follows:
     "Question goes here?"
-    Provide four possible answers separated by underscores, and enclose the correct answer in double parentheses. For example: [Answer1_Answer2_Answer3_((CorrectAnswer))]`;
+    Provide four possible answers separated by underscores, and enclose the correct answer in double parentheses.
+     For example: [Answer1_Answer2_Answer3_((CorrectAnswer))] `;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
+
     const text = response.text();
-        console.log(text);
+        
 
     // Define regular expressions
     const questionRegex = /"([^"]+)"/;
@@ -44,24 +46,20 @@ export async function addQuiz(req, res) {
     const questionMatch = text.match(questionRegex);
     const answersMatch = text.match(answersRegex);
     const correctAnswerMatch = text.match(correctAnswerRegex);
+    
 
     // Output the results (optional)
     const question = questionMatch ? questionMatch[1] : null;
     const answers = answersMatch ? answersMatch[1].split("_") : [];
     const correctAnswer = correctAnswerMatch ? correctAnswerMatch[1] : null;
 
-    //verifier si la question est nulle
-    /*
-    if (!question) {
-      console.log("Error: Question is null, skipping quiz creation");
-      return; // Exit the function
-    }
-    */
+    console.log(question)
+    console.log(answers)
+    console.log(correctAnswer)
 
-    // Log the extracted quiz (optional)
-    console.log("Question:", question);
-    console.log("Answers:", answers);
-    console.log("Correct Answer:", correctAnswer);
+   
+
+    
 
     // Create a new quiz document in the database
     const newQuiz = {
@@ -87,7 +85,6 @@ export async function addQuiz(req, res) {
       return res.status(500).json({ error: "Internal server error" });
     }
 
-    // You might want to add a condition to break the loop after generating a certain number of quizzes
   
 
   // Return a success response
