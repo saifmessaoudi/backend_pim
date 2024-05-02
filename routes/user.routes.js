@@ -10,7 +10,7 @@ import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,st
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 
 import  {getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';
-import  {addMovieGenders,deleteMovieGenders,getGendersById,findusersfriend,getuserbyusername,findusersfriendbyusername} from '../controllers/user.controller.js';
+import  {addMovieGenders,deleteMovieGenders,getGendersById,findusersfriend,getuserbyusername,findusersfriendbyusername,getAdmins} from '../controllers/user.controller.js';
 
 const router = Router();
 const upload = imageUploadMiddleware("profilePicture",{ fileSize: 1024 * 1024 * 5 });
@@ -108,4 +108,5 @@ router.delete('/deleteUser/:username', deleteUser);
   router.get('/waa/:userId', findusersfriend);
   router.get('/:username/genres', getGenreFilm);
   router.get('/friends/:username', findusersfriendbyusername);
+  router.get('/role/admin', getAdmins);
   export default  router;

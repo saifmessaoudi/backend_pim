@@ -1060,5 +1060,23 @@ export const findusersfriendbyusername = async (req, res) => {
     }
 };
 
+export const getAdmins = async (req, res) => {
+  try {
+      // Rechercher tous les utilisateurs avec le rôle "admin"
+      const admins = await User.find({ role: 'admin' });
+
+      // Vérifier s'il y a des utilisateurs avec ce rôle
+      if (admins.length === 0) {
+          return res.status(404).json({ message: 'No admins found' });
+      }
+
+      // Retourner les utilisateurs avec le rôle "admin"
+      res.status(200).json(admins);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 
 
