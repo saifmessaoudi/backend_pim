@@ -22,6 +22,8 @@ import { Server } from "socket.io";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
 import rankRouter from "./routes/rank.routes.js";
+import tesseractRouter from "./routes/tesseract.routes.js";
+
 
 const app = express();
 const server = http.createServer(app);
@@ -68,6 +70,9 @@ app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
 app.use("/reclamation",reclamationRouter );
 app.use("/rank", rankRouter);
+
+app.use('/tesseract', tesseractRouter);
+
 app.use(cors());
 
 app.use('/room',roomrouter) ; 

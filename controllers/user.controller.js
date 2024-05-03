@@ -948,3 +948,41 @@ export const selectedroulette = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+export const secuser = async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+      const user = await User.findOne({ username });
+
+      if (!user) {
+          return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      if (user.lockUntil > Date.now()) {
+          const remainingTime = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000)); 
+          return res.status(403).json({ error: `Account locked. Try again in ${remainingTime} minutes.` });
+      }
+
+      
+      if (password === user.password) {
+        
+          await User.updateOne({ _id: user._id }, { $set: { loginAttempts: 0, lockUntil: 0 } });
+
+          req.session.user = user;
+          return res.status(200).json({ message: 'Login successful' });
+      } else {
+          await User.updateOne({ _id: user._id }, { $inc: { loginAttempts: 1 } });
+
+          if (user.loginAttempts + 1 >= 3) {
+              await User.updateOne({ _id: user._id }, { $set: { lockUntil: Date.now() + 60 * 60 * 1000 } }); 
+              return res.status(403).json({ error: 'Account locked. Try again in 1 hour.' });
+          }
+
+          return res.status(401).json({ error: 'Invalid username or password' });
+      }
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+};
