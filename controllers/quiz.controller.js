@@ -78,7 +78,7 @@ export async function addQuiz(req, res) {
 
   return res
     .status(200)
-    .json({ message: "Quiz created successfully", generatedQuestion });
+    .json({ message: "Quiz created successfully", newQuiz });
 }
 
 export function deleteQuiz(req, res) {
