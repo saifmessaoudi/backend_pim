@@ -84,8 +84,9 @@ export async function addRoom(req, res) {
       await Room.findByIdAndUpdate(roomid, { $push: { roomusersPending: recipient } });
   
       // Notify recipient about the new invitation
-      io.to(recipient).emit('newRoomRequest', { roomid, recipient });
 
+      io.emit('newRoomRequest', { roomid, recipient })
+      
   
       res.status(201).json({ message: 'Invitation created successfully' });
     } catch (error) {
