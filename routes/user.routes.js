@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import sendEmail from "../utils/mailer.js";
 import { body } from 'express-validator';
+
 import { getAllUsers, getById, updatePassword, updateUser , selectedroulette ,stastverifiedaccount} from '../controllers/user.controller.js';
 import { imageUploadMiddleware } from "../middlewares/multer-config.js";
 import  {getAllLocations,savelocation,getAll,addInvitation,deleteInvitation,getFriendsById ,deleteUser,getGenreFilm} from '../controllers/user.controller.js';

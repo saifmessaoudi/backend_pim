@@ -28,7 +28,7 @@ export const registerUser = async (req, res) => {
 
         const authToken = jwt.sign(
             { username: user.username, id: user._id },
-            process.env.JWT_KEY,
+            process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
 
@@ -219,7 +219,10 @@ export const loginUser1 = async (req, res) => {
             secretKey,
             { expiresIn: '1h' }
         );
-  
+    
+
+
+        
         res.json({ token, user });
     } catch (error) {
         console.error(error);
@@ -227,4 +230,3 @@ export const loginUser1 = async (req, res) => {
     }
     
 };
-
