@@ -28,7 +28,7 @@ export const registerUser = async (req, res) => {
 
         const authToken = jwt.sign(
             { username: user.username, id: user._id },
-            process.env.JWT_KEY,
+            process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
 
@@ -133,50 +133,6 @@ export const loginUser = async (req, res) => {
     }
 };
 
-export const loginUser1 = async (req, res) => {
-    const { email, password } = req.body;
-
-    // Validation des entrées
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-
-    try {
-        const user = await UserModel.findOne({ email });
-
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        if (user.banned === 'banned') {
-            return res.status(403).json({ message: 'Your account is banned' });
-        }
-
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-       
-        const secretKey = process.env.JWT_SECRET || 'defaultSecret'; // Utilisez votre propre clé secrète ici
-        const token = jwt.sign(
-            {
-                userId: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                token: user.JWT_KEY // Corrected token value
-            },
-            secretKey,
-            { expiresIn: '1h' }
-        );
-        // Missing res.json() here
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-};
-
 export const loginAdmin = async (req, res) => {
     try {
         const { email, username, password } = req.body;
@@ -218,4 +174,52 @@ export const loginAdmin = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
+};
+export const loginUser1 = async (req, res) => {
+    const { email, password } = req.body;
+
+    // Validation des entrées
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    try {
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        if (user.banned === 'banned' ) {
+            return res.status(403).json({ message: 'Your account is banned' });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+       
+        const secretKey = process.env.JWT_SECRET || 'defaultSecret'; // Utilisez votre propre clé secrète ici
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                token:user.JWT_KEY // Ajoutez d'autres informations utilisateur au besoin
+            },
+            secretKey,
+            { expiresIn: '1h' }
+        );
+    
+
+
+        
+        res.json({ token, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+    
 };

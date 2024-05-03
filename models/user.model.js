@@ -19,11 +19,10 @@ const userSchema = new mongoose.Schema(
         type: {
           type: String,
           enum: ["Point"],
-          required: true,
         },
         coordinates: {
           type: [Number], 
-          required: true,
+         
         },
       },
     
@@ -45,6 +44,8 @@ const userSchema = new mongoose.Schema(
       isVerified : { type: Boolean, default: false},
       resetVerificationToken : { type: String},
       verificationToken: { type: String, index: true, unique: true, sparse: true },
+    rank : { type: mongoose.Schema.Types.ObjectId, ref: "Rank"},
+    points : { type: Number, default: 0},
     }
     ); 
 

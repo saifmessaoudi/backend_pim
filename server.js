@@ -18,8 +18,10 @@ import { dirname } from "path";
 import Room from "./models/room.model.js";
 import reclamationRouter from "./routes/reclamation.routes.js";
 import quizRouter from "./routes/quiz.routes.js";
+import routerTask from "./routes/task.routes.js";
 import naughtyWords from "naughty-words";
 import setupSocket from "./config/configSocket.js";
+import rankRouter from "./routes/rank.routes.js";
 
 
 
@@ -56,15 +58,18 @@ app.use(
 app.use(express.static("public"));
 
 app.use("/movies", movierouter);
+app.use("/task" , routerTask);
 app.use("/user", router);
 app.use("/movie", movierouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
 app.use("/reclamation", reclamationRouter);
+app.use('/quiz',quizRouter); 
 app.use(cors());
 
 app.use("/quiz", quizRouter);
 app.use("/room", roomrouter);
+app.use("/rank", rankRouter);
 
 setupSocket(io);
 
@@ -103,7 +108,7 @@ app.post("/addMessage", async (req, res) => {
     }
   });
 
-
+app.use("/quiz", quizRouter);
 
 server.listen(process.env.PORT, () => {
   console.log(

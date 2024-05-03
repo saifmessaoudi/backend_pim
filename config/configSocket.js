@@ -42,9 +42,8 @@ const setupSocket = (io) =>{
             socket.broadcast.to(socket.roomId).emit('stop');
         });
         socket.on('leaveRoom', (data) => {
-            
+            console.log(data);
           const { roomId, user } = data;
-          console.log(data["user"])
           const userId = user.userId;
           socket.leave(roomId);
           socket.broadcast.to(roomId).emit('leaveRoom', { userId: userId });

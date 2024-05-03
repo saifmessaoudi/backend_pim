@@ -5,34 +5,29 @@ const quizSchema = new Schema({
   categorie: [
     {
       type: String,
-      required: true,
+     
     },
   ],
-  questions: [
+  question: {
+        type: String,
+  },
+  answers: [
     {
-      question: {
+      answer: {
         type: String,
         required: true,
       },
-      answers: [
-        {
-          answer: {
-            type: String,
-            required: true,
-          },
-          isCorrect: {
-            type: Boolean,
-            required: true,
-          },
-          winningPoints: {
-            type: Number,
-            required: true,
-          },
-        },
-      ],
+      isCorrect: {
+        type: Boolean,
+        required: true,
+      },
+     
     },
   ],
-
+  winningPoints: {
+    type: Number,
+    required: true,
+  },
   date: {
     type: Date,
     default: Date.now,

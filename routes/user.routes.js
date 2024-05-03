@@ -61,7 +61,8 @@ router.post('/register', [
 router.get('/verify/:token', verifyEmail);
     router.put("/update/:id",upload , updateUser);
 router.post('/login', loginUser);
-router.post('/login-admin',loginAdmin);
+router.post('/login1', loginUser1);
+router.post('/login-admin', loginAdmin);
 router.get("/users" , getAllUsers);
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)
