@@ -11,8 +11,9 @@ export const createTask = async (req, res) => {
             releaseDate,
             description,
             recipient,
+            state: "to do"
         });
-
+        
         const savedTask = await newTask.save();
 
         res.status(201).json({ message: 'Task created successfully', task: savedTask });
@@ -115,6 +116,26 @@ export const getTasksByRecipe = async (req, res) => {
         }
 
         // Retourner les tâches associées à l'ID de l'utilisateur
+        res.status(200).json(tasks);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getTaskByState = async (req, res) => {
+    try {
+        const { state } = req.params; // Obtenir le state du paramètre de requête
+
+        // Recherche des tâches par état
+        const tasks = await Task.find({ state });
+
+        // Si aucune tâche n'est trouvée, renvoyer un message approprié
+        if (tasks.length === 0) {
+            return res.status(404).json({ message: `No tasks found with state: ${state}` });
+        }
+
+        // Renvoyer toutes les tâches correspondant à l'état donné
         res.status(200).json(tasks);
     } catch (error) {
         console.error(error);

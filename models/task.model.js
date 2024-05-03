@@ -8,6 +8,7 @@ const taskSchema = new Schema(
         releaseDate : { type: Date},
         description : { type: String, required: true},
         recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        state: {type : String}
     }
     );
 
