@@ -15,7 +15,7 @@ export async function addRoom(req, res) {
           title,
           moviename,
           userowner,
-          roomusers: [userowner], // Ajouter le propriétaire de la salle à la liste des utilisateurs de la salle
+          roomusers: [userowner], 
           roomusersPending,
           Allroomusers,
           roomPoster,
@@ -84,7 +84,8 @@ export async function addRoom(req, res) {
       await Room.findByIdAndUpdate(roomid, { $push: { roomusersPending: recipient } });
   
       // Notify recipient about the new invitation
-      
+      io.to(recipient).emit('newRoomRequest', { roomid, recipient });
+
   
       res.status(201).json({ message: 'Invitation created successfully' });
     } catch (error) {

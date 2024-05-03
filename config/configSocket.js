@@ -68,6 +68,12 @@ const setupSocket = (io) =>{
               callback();
           }
       });
+
+
+      socket.on('newRoomRequest', (msg, callback) => {
+        
+        console.log ('socket room invitation') ;      
+    });
       
       
       // Disconnect event
