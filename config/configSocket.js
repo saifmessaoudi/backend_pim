@@ -49,13 +49,25 @@ const setupSocket = (io) =>{
           socket.broadcast.to(roomId).emit('leaveRoom', { userId: userId });
           console.log(`User ${user.userId} left room: ${roomId}`);
       });
+
+      socket.on('Profile', (data) => {
+        console.log("Received Profile", data); 
+    });
+    
+         socket.on('newRoomRequest', (data) => {
+            console.log('newRoomRequest received');
+        }); 
       
+    
+
         socket.on('notification', (msg, callback) => {
           // Emit the chat message event
           io.emit('chat message', msg);
           socket.on('testEvent', (recipient, roomid) => {
               console.log('Received testEvent:', recipient, roomid);
           });
+
+          
           
           io.emit('testNotification', {
               type: 'new_message',
