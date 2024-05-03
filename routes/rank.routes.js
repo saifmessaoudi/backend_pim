@@ -12,6 +12,7 @@ rankRouter.put("/updateRank/:id", rank.updateRank);
 rankRouter.delete("/deleteRank/:id", rank.deleteRank);
 rankRouter.post("/affectedRank", rank.affectRankToUser);
 rankRouter.get("/getRankByUser/:id", rank.getRankByUserId);
+rankRouter.get("/getAllRanksUsers", rank.getAllRanksUsers);
 
 
 export default rankRouter;

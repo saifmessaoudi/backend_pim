@@ -8,12 +8,9 @@ const quizSchema = new Schema({
      
     },
   ],
-  
-      question: {
+  question: {
         type: String,
-      },
-  
-
+  },
   answers: [
     {
       answer: {
@@ -31,7 +28,6 @@ const quizSchema = new Schema({
     type: Number,
     required: true,
   },
-
   date: {
     type: Date,
     default: Date.now,
