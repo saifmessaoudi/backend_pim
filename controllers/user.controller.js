@@ -698,7 +698,7 @@ export async function addInvitation(req, res) {
         await User.updateOne({ _id: recipient }, { $push: { friendRequests: sender } });
     
         
-        io.emit('newFriendRequest', { sender, recipient });
+        io.to(recipient).emit('newFriendRequest', { sender, recipient });
         res.status(201).json({ message: 'Invitation created successfully' });
     } catch (error) {
         console.error(error);
