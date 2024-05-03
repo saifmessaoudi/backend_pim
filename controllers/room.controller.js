@@ -8,7 +8,7 @@ import { io } from '../server.js';
 export async function addRoom(req, res) {
   try {
       // Extraire les données de la requête
-      const { title, moviename, userowner, roomusers, roomusersPending, Allroomusers, roomPoster, UsersMicAccess, UsersChatAccess,UsersOwnerAccess } = req.body;
+      const { title, moviename, userowner, roomusers, roomusersPending, Allroomusers, roomPoster, UsersMicAccess, UsersChatAccess,UsersOwnerAccess ,visibility } = req.body;
 
       // Créer une nouvelle instance de Room
       const newRoom = new Room({
@@ -21,7 +21,8 @@ export async function addRoom(req, res) {
           roomPoster,
           UsersMicAccess,
           UsersChatAccess,
-          UsersOwnerAccess: [userowner] 
+          UsersOwnerAccess: [userowner], 
+          visibility : visibility
       });
 
       // Sauvegarder la nouvelle salle dans la base de données
@@ -84,8 +85,9 @@ export async function addRoom(req, res) {
       await Room.findByIdAndUpdate(roomid, { $push: { roomusersPending: recipient } });
   
       // Notify recipient about the new invitation
-      io.to(recipient).emit('newRoomRequest', { roomid, recipient });
 
+      io.emit('newRoomRequest', { roomid, recipient })
+      
   
       res.status(201).json({ message: 'Invitation created successfully' });
     } catch (error) {
@@ -198,10 +200,8 @@ export async function addRoom(req, res) {
   }
 
 
-
-  
-  export async function getAllRooms(req, res) {
-    Room.find({})
+  export async function getAllRoomsWithPrivate(req, res) {
+    Room.find() // Query condition to filter rooms with visibility set to 'public'
         .populate({
             path: 'messages',
             populate: {
@@ -216,6 +216,26 @@ export async function addRoom(req, res) {
             res.status(500).json({ error: err });
         });
 }
+  
+  export async function getAllRooms(req, res) {
+    Room.find({ visibility: 'public' }) // Query condition to filter rooms with visibility set to 'public'
+        .populate({
+            path: 'messages',
+            populate: {
+                path: 'user',
+                model: 'User'
+            }
+        })
+        .then(docs => {
+            res.status(200).json(docs);
+        })
+        .catch(err => {
+            res.status(500).json({ error: err });
+        });
+}
+
+
+
 
 
 

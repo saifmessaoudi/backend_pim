@@ -24,6 +24,7 @@ const roomSchema = new Schema(
         UsersOwnerAccess : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
         messages: [messageSchema],
         roomPoster: { type: String, required: true},
+        visibility : { type: String},
     }
     );
 
