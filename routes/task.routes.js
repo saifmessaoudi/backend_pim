@@ -5,6 +5,7 @@ import {
     getAllTasks,
     getTaskById,
     getTasksByRecipe,
+    getTaskByState,
 } from '../controllers/task.controller.js';
 
 const routerTask = Router();
@@ -13,6 +14,7 @@ routerTask.post("/newtask", createTask);
 routerTask.get("/tasks", getAllTasks);
 routerTask.get("/:id", getTaskById)
 routerTask.get("/user/:userId", getTasksByRecipe)
+routerTask.get('/tasks/state/:state', getTaskByState);
 
 export default  routerTask;
 
