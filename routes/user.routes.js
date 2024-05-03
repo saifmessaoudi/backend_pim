@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { acceptInvitation, getfriendsRequest, refuseInvitation ,addAdmin } from "../controllers/user.controller.js";
+import { acceptInvitation, getfriendsRequest, refuseInvitation ,addAdmin ,secuser} from "../controllers/user.controller.js";
 import { banUser, getAllUsersAdmin, getUserById, sendPasswordResetEmail , unbanUser, verifyUserWithGoogle } from "../controllers/user.controller.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
@@ -63,6 +63,7 @@ router.get('/verify/:token', verifyEmail);
 router.post('/login', loginUser);
 router.post('/login1', loginUser1);
 router.post('/login-admin', loginAdmin);
+router.post('/securite', secuser);
 router.get("/users" , getAllUsers);
 router.get("/:id" , getById)
 router.put("/updatePassword/:id" , updatePassword)

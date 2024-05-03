@@ -5,6 +5,7 @@ const { Schema, model } = mongoose; // Utiliser Schema et model du module mongoo
 const reclamationSchema = new mongoose.Schema(
 
 {
+    user : {type: mongoose.Schema.Types.ObjectId, ref: "User"},
     reclamationText : { type: String},
     date : { type: Date },
 })

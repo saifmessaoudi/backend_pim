@@ -22,8 +22,7 @@ import routerTask from "./routes/task.routes.js";
 import naughtyWords from "naughty-words";
 import setupSocket from "./config/configSocket.js";
 import rankRouter from "./routes/rank.routes.js";
-
-
+import tesseractRouter from "./routes/tesseract.routes.js";
 
 
 const app = express();
@@ -66,6 +65,10 @@ app.use("/subscription", subscriptionRouter);
 app.use("/plan", planRouter);
 app.use("/reclamation", reclamationRouter);
 app.use('/quiz',quizRouter); 
+app.use("/rank", rankRouter);
+
+app.use('/tesseract', tesseractRouter);
+
 app.use(cors());
 
 app.use("/quiz", quizRouter);

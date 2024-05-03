@@ -5,6 +5,7 @@ import UserModel from '../models/user.model.js';
 import sendEmail from '../utils/mailer.js';
 import generateVerificationToken from './generateVerificationToken.js'; // Corrected import path
 
+let loginAttempts = 0;
 export const registerUser = async (req, res) => {
     try {
         const { username, password, email } = req.body;
@@ -84,96 +85,71 @@ export const verifyEmail = async (req, res) => {
 export const loginUser = async (req, res) => {
     const { email, username, password } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  try {
+    let user = await UserModel.findOne({
+      $or: [
+        { email: email },
+        { username: username }
+      ]
+    });
+
+    if (req.user && req.user.googleId) {
+      return res.status(200).json({ message: 'Successfully logged in with Google', user: req.user });
     }
 
-    try {
-        const user = await UserModel.findOne({
-            $or: [
-                { email: email },
-                { username: username }
-            ]
-        });
-
-        if (req.user && req.user.googleId) {
-            return res.status(200).json({ message: 'Successfully logged in with Google', user: req.user });
-        }
-
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        if (user.banned === 'banned') {
-            return res.status(403).json({ message: 'Your account is banned' });
-        }
-
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        const secretKey = process.env.JWT_SECRET || 'defaultSecret';
-        const token = jwt.sign(
-            {
-                userId: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-            },
-            secretKey,
-            { expiresIn: '1h' }
-        );
-
-        res.json({ token, user });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
-};
 
-export const loginAdmin = async (req, res) => {
-    try {
-        const { email, username, password } = req.body;
+    if (user.banned === 'banned') {
+      return res.status(403).json({ message: 'Your account is banned' });
+    }
 
-        const user = await UserModel.findOne({
-            $or: [
-                { email: email },
-                { username: username }
-            ]
-        });
+    // Check if the user is banned before checking the password
+    if (user.isBanned) {
+      return res.status(403).json({ message: 'Your account is temporarily locked. Please try again later.' });
+    }
 
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      loginAttempts++;
       
-        if (!user.role.toLowerCase().includes('admin')) {
-            return res.status(403).json({ message: 'You are not authorized to access this resource' });
-        }
+      console.log(loginAttempts + ' attempts to login');
 
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        const secretKey = process.env.JWT_SECRET || 'defaultSecret';
-        const token = jwt.sign(
-            {
-                userId: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-            },
-            secretKey,
-            { expiresIn: '1h' }
-        );
-
-        res.json({ token, user });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+      if (loginAttempts > 3) {
+        user.isBanned = true;
+        await user.save();
+        return res.status(403).json({ message: 'Too many failed login attempts. Your account is temporarily locked. Please try again later.' });
+      }
+  
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    await user.save();
+    loginAttempts = 0;
+
+    const secretKey = process.env.JWT_SECRET || 'defaultSecret';
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      secretKey,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ token, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 export const loginUser1 = async (req, res) => {
     const { email, password } = req.body;
@@ -222,4 +198,46 @@ export const loginUser1 = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
     
+};
+export const loginAdmin = async (req, res) => {
+    try {
+        const { email, username, password } = req.body;
+
+        const user = await UserModel.findOne({
+            $or: [
+                { email: email },
+                { username: username }
+            ]
+        });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+      
+        if (!user.role.toLowerCase().includes('admin')) {
+            return res.status(403).json({ message: 'You are not authorized to access this resource' });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const secretKey = process.env.JWT_SECRET || 'defaultSecret';
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+            secretKey,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ token, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };
