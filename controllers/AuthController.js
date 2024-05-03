@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import UserModel from '../models/user.model.js';
 import sendEmail from '../utils/mailer.js';
-import generateVerificationToken from '../controllers/generateVerificationToken.js';
+import generateVerificationToken from './generateVerificationToken.js'; // Corrected import path
 
 export const registerUser = async (req, res) => {
     try {
@@ -43,7 +43,8 @@ export const registerUser = async (req, res) => {
 
         res.status(200).json({ user: newUser, authToken, message: 'User registered successfully. Please check your email for verification.' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -80,65 +81,57 @@ export const verifyEmail = async (req, res) => {
     }
 };
 
-
-
-    
-
 export const loginUser = async (req, res) => {
-  const { email, username, password } = req.body;
+    const { email, username, password } = req.body;
 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-  }
+    try {
+        const user = await UserModel.findOne({
+            $or: [
+                { email: email },
+                { username: username }
+            ]
+        });
 
-  try {
-      
-      const user = await UserModel.findOne({
-          $or: [
-              { email: email },
-              { username: username }
-          ]
-      });
+        if (req.user && req.user.googleId) {
+            return res.status(200).json({ message: 'Successfully logged in with Google', user: req.user });
+        }
 
-      if (req.user && req.user.googleId) {
-          return res.status(200).json({ message: 'Successfully logged in with Google', user: req.user });
-      }
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-      if (!user) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-      }
+        if (user.banned === 'banned') {
+            return res.status(403).json({ message: 'Your account is banned' });
+        }
 
-      if (user.banned === 'banned') {
-          return res.status(403).json({ message: 'Your account is banned' });
-      }
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-      const validPassword = await bcrypt.compare(password, user.password);
-      if (!validPassword) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-      }
+        const secretKey = process.env.JWT_SECRET || 'defaultSecret';
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+            secretKey,
+            { expiresIn: '1h' }
+        );
 
-      const secretKey = process.env.JWT_SECRET || 'defaultSecret';
-      const token = jwt.sign(
-          {
-              userId: user._id,
-              username: user.username,
-              email: user.email,
-              role: user.role,
-            
-          },
-          secretKey,
-          { expiresIn: '1h' }
-      );
-
-      res.json({ token, user });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
-  }
+        res.json({ token, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };
-
 
 export const loginAdmin = async (req, res) => {
     try {
