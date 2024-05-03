@@ -46,6 +46,7 @@ const userSchema = new mongoose.Schema(
       resetVerificationToken : { type: String},
       verificationToken: { type: String, index: true, unique: true, sparse: true },
     rank : { type: mongoose.Schema.Types.ObjectId, ref: "Rank"},
+    points : { type: Number, default: 0},
     }
     ); 
 

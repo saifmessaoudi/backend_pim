@@ -89,6 +89,15 @@ function getRankByUserId(req, res) {
         .catch((findError) => res.status(404).json({ error: findError.message }));
 }
 
+function getAllRanksUsers(req, res) {
+    User.find({}, '_id rank') 
+        .populate('rank') 
+        .then((users) => res.status(200).json(users))
+        .catch((findError) => res.status(404).json({ error: findError.message }));
+}
 
 
-export default { addRank, getRanks , getRankById , getRankByName , getRankByPoints , updateRank , deleteRank , affectRankToUser , getRankByUserId};
+
+
+
+export default { addRank, getRanks , getRankById , getRankByName , getRankByPoints , updateRank , deleteRank , affectRankToUser , getRankByUserId , getAllRanksUsers};
