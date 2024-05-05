@@ -1,5 +1,9 @@
 
 const setupSocket = (io) =>{
+
+
+    
+
     io.on('connection', (socket) => {
         console.log('connected');
       
@@ -54,6 +58,11 @@ const setupSocket = (io) =>{
         console.log("Received Profile", data); 
     });
     
+
+        socket.on('testEvent', (data) => {
+            console.log('testEvent received');
+        }); 
+
          socket.on('newRoomRequest', (data) => {
             console.log('newRoomRequest received');
         }); 
