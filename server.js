@@ -114,13 +114,18 @@ app.use("/quiz", quizRouter);
 app.get("/test-socket", (req, res) => {
   try {
     // Emit a test event to the client
-    io.emit('testEvent', 'Test message from server');
+    io.emit('testNotification', 'Test message from server');
 
     return res.status(200).json({ message: "Test event sent to WebSocket clients" });
   } catch (error) {
     console.error("Error sending test event:", error.message);
     return res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+//path to restur .js client page 
+app.get("/", (req, res) => {
+  res.render("client");
 });
 
 server.listen(process.env.PORT, () => {
