@@ -78,11 +78,7 @@ const setupSocket = (io) =>{
 
           
           
-          io.emit('testNotification', {
-              type: 'new_message',
-              message: 'A new message has been added!',
-              data: { content: msg }
-          });
+       
           
           if (typeof callback === 'function') {
               callback();
