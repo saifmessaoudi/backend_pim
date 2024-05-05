@@ -1,5 +1,9 @@
 
 const setupSocket = (io) =>{
+
+
+    
+
     io.on('connection', (socket) => {
         console.log('connected');
       
@@ -54,6 +58,11 @@ const setupSocket = (io) =>{
         console.log("Received Profile", data); 
     });
     
+
+        socket.on('testEvent', (data) => {
+            console.log('testEvent received');
+        }); 
+
          socket.on('newRoomRequest', (data) => {
             console.log('newRoomRequest received');
         }); 
@@ -69,11 +78,7 @@ const setupSocket = (io) =>{
 
           
           
-          io.emit('testNotification', {
-              type: 'new_message',
-              message: 'A new message has been added!',
-              data: { content: msg }
-          });
+       
           
           if (typeof callback === 'function') {
               callback();
