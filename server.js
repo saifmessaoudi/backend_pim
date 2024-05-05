@@ -123,10 +123,7 @@ app.get("/test-socket", (req, res) => {
   }
 });
 
-//path to restur .js client page 
-app.get("/", (req, res) => {
-  res.render("client");
-});
+
 
 server.listen(process.env.PORT, () => {
   console.log(
