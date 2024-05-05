@@ -110,6 +110,19 @@ app.post("/addMessage", async (req, res) => {
 
 app.use("/quiz", quizRouter);
 
+
+app.get("/test-socket", (req, res) => {
+  try {
+    // Emit a test event to the client
+    io.emit('testEvent', 'Test message from server');
+
+    return res.status(200).json({ message: "Test event sent to WebSocket clients" });
+  } catch (error) {
+    console.error("Error sending test event:", error.message);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 server.listen(process.env.PORT, () => {
   console.log(
     `Server is running ${process.env.HOST} on port ${process.env.PORT}`
