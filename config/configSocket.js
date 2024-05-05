@@ -67,7 +67,9 @@ const setupSocket = (io) =>{
             console.log('newRoomRequest received');
         }); 
       
-    
+        socket.on('testNotification', (data) => {
+            console.log('Received testNotification:', data);
+        });
 
         socket.on('notification', (msg, callback) => {
           // Emit the chat message event
