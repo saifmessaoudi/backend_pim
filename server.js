@@ -118,7 +118,11 @@ app.use("/quiz", quizRouter);
 app.get("/test-socket", (req, res) => {
   try {
     // Emit a test event to the client
-    io.emit('testNotification', 'Test message from server');
+    io.on("connection", (socket) => {
+      console.log("A user connected");
+      socket.emit("testEvent", { message: "Test event sent to WebSocket clients" });
+    });
+
 
     return res.status(200).json({ message: "Test event sent to WebSocket clients" });
   } catch (error) {
