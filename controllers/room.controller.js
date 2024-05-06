@@ -97,7 +97,7 @@ export async function addRoom(req, res) {
 
   export async function acceptRoomInvitation(req, res) {
     try {
-      const { roomid, recipient } = req.body;
+      const {roomid, recipient } = req.body;
   
       const roomExists = await Room.exists({ _id: roomid });
       const recipientExists = await User.exists({ _id: recipient });
@@ -119,6 +119,8 @@ export async function addRoom(req, res) {
         $push: { roomusers: recipient },
         $pull: { roomusersPending: recipient, Allroomusers: recipient }
     });
+
+    
   
       // Notify recipient about the new invitation
       
@@ -329,6 +331,36 @@ export async function deleteChatAccess(req, res) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+export async function fetchRoomInvitationByUser(req, res) {
+  try {
+    const { Userid } = req.query; 
+
+    const userExists = await User.exists({ _id: Userid });
+    const RoomInvitation = [];
+
+    if (!userExists ) {
+      return res.status(404).json({ message: 'User or room does not exist' });
+    }
+    const rooms = await Room.find().select("-password");
+    if (rooms.length === 0) {
+      return res.status(400).json("No users found");
+    }
+    rooms.forEach(room => {
+      if(room.roomusersPending.some(user => user._id.toString() === Userid)) {
+        RoomInvitation.push(room);
+      }
+    });
+    
+    res.status(200).json(RoomInvitation);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
 
 export async function addOwnerAccess(req, res) {
   try {

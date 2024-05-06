@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addRoomInvitation, deleteRoomInvitation, getAllRooms, addaUserAccess, deleteUserAccess, addChatAccess, deleteChatAccess, addOwnerAccess, deleteOwnerAccess, deleteRoom, getnotifcationtv, addRoomInvitationtv, addRoom, getroombyid,adduserToRoom,acceptRoomInvitation } from '../controllers/room.controller.js';
+import { addRoomInvitation, deleteRoomInvitation, getAllRooms, addaUserAccess, deleteUserAccess, addChatAccess, deleteChatAccess, addOwnerAccess, deleteOwnerAccess, deleteRoom, getnotifcationtv, addRoomInvitationtv, addRoom, getroombyid,adduserToRoom,acceptRoomInvitation,fetchRoomInvitationByUser} from '../controllers/room.controller.js';
 
 
 const roomrouter = Router();
@@ -29,6 +29,10 @@ roomrouter.route('/deleteroominvitation')
 
 roomrouter.route('/getRooms')
 .get(getAllRooms)
+
+roomrouter.route('/fetchRoomInvitation')
+.get(fetchRoomInvitationByUser)
+
 roomrouter.route('/getroom/:roomId')
 .get(getroombyid)
 roomrouter.route('/getnotif/:userId')
