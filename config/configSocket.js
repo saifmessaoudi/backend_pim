@@ -9,7 +9,7 @@ const setupSocket = (io) =>{
       
         socket.on('joinRoom', (data) => {
             console.log("Received joinRoom event with data:", data); // Log the entire data object for debugging
-
+  
             const  roomId  = data;
             if (socket.roomId && socket.roomId !== roomId) {
                 // Only leave the room if the socket is in a different room
@@ -53,16 +53,16 @@ const setupSocket = (io) =>{
           socket.broadcast.to(roomId).emit('leaveRoom', { userId: userId });
           console.log(`User ${user.userId} left room: ${roomId}`);
       });
-
+  
       socket.on('Profile', (data) => {
         console.log("Received Profile", data); 
     });
     
-
+  
         socket.on('testEvent', (data) => {
             console.log('testEvent received');
         }); 
-
+  
          socket.on('newRoomRequest', (data) => {
             console.log('newRoomRequest received');
         }); 
@@ -70,14 +70,14 @@ const setupSocket = (io) =>{
         socket.on('testNotification', (data) => {
             console.log('Received testNotification:', data);
         });
-
+  
         socket.on('notification', (msg, callback) => {
           // Emit the chat message event
           io.emit('chat message', msg);
           socket.on('testEvent', (recipient, roomid) => {
               console.log('Received testEvent:', recipient, roomid);
           });
-
+  
           
           
        
@@ -100,6 +100,5 @@ const setupSocket = (io) =>{
       
       
      
-};
-export default setupSocket;
-
+  };
+  export default setupSocket;
