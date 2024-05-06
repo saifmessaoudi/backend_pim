@@ -47,11 +47,11 @@ const setupSocket = (io) =>{
         });
         socket.on('leaveRoom', (data) => {
             console.log(data);
-          const { roomId, user } = data;
-          const userId = user.userId;
+          const { roomId, userId } = data;
+          
           socket.leave(roomId);
           socket.broadcast.to(roomId).emit('leaveRoom', { userId: userId });
-          console.log(`User ${user.userId} left room: ${roomId}`);
+          console.log(`User ${userId} left room: ${roomId}`);
       });
   
       socket.on('Profile', (data) => {
