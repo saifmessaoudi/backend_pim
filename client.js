@@ -1,4 +1,3 @@
-// client.js
 import ioo from 'socket.io-client';
 
 const socket = ioo("https://backend-pim.onrender.com/");
@@ -11,4 +10,4 @@ socket.on('connect', () => {
         console.log('Received testNotification:', data);
     });
 });
-// Add more event listeners or emit events as needed
+
