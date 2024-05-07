@@ -22,6 +22,7 @@ const roomSchema = new Schema(
         UsersMicAccess : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
         UsersChatAccess : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
         UsersOwnerAccess : [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
+        emojiPositions: [{ position: Number }],
         messages: [messageSchema],
         roomPoster: { type: String, required: true},
     }

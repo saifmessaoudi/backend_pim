@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { getnotifcationtv,addRoomInvitationtv,addRoom,getroombyid,addRoomInvitation,deleteRoomInvitation,getAllRooms,addaUserAccess,deleteUserAccess,addChatAccess,deleteChatAccess,addOwnerAccess,deleteOwnerAccess} from '../controllers/room.controller.js';
+import { addEmojiPositions,getnotifcationtv,addRoomInvitationtv,addRoom,getroombyid,addRoomInvitation,deleteRoomInvitation,getAllRooms,addaUserAccess,deleteUserAccess,addChatAccess,deleteChatAccess,addOwnerAccess,deleteOwnerAccess} from '../controllers/room.controller.js';
 
 const roomrouter = Router();
 
@@ -41,7 +41,7 @@ roomrouter.route('/addChatAccess')
 roomrouter.route('/deleteChataccess')
 .patch(deleteChatAccess)
 roomrouter.post('/join-room-tv', addRoomInvitationtv);
-
+roomrouter.post('/emoji/:roomId', addEmojiPositions);
 
 
 

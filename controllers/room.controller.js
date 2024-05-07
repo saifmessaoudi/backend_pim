@@ -389,3 +389,33 @@ export const getnotifcationtv = async (req, res) => {
   }
 };
 
+export const addEmojiPositions = async (req, res) => {
+  try {
+    const { position } = req.body;
+    const { roomId } = req.params;
+
+    // Validate position
+    if (typeof position !== 'number' || isNaN(position)) {
+      return res.status(400).json({ error: 'Invalid position. It must be a number.' });
+    }
+
+    // Validate roomId  
+    if (!mongoose.isValidObjectId(roomId)) {
+      return res.status(400).json({ error: 'Invalid room ID.' });
+    }
+
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ error: 'Room not found.' });
+    }
+
+    // Add new emoji position
+    room.emojiPositions.push({ position }); // Changed from `post` to `push`
+    await room.save();
+
+    res.status(200).json({ success: true, message: 'Emoji position added.' });
+  } catch (error) {
+    console.error('Error in addEmojiPositions:', error); // Log the error for debugging
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
