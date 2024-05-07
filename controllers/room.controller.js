@@ -8,7 +8,7 @@ import { io } from '../server.js';
 export async function addRoom(req, res) {
   try {
       // Extraire les données de la requête
-      const { title, moviename, userowner, roomusers, roomusersPending, Allroomusers, roomPoster, UsersMicAccess, UsersChatAccess,UsersOwnerAccess ,visibility } = req.body;
+      const { title, moviename, userowner, roomusers, roomusersPending, Allroomusers, roomPoster, UsersMicAccess, UsersChatAccess,UsersOwnerAccess,deleteuserfromRoom ,visibility } = req.body;
 
       // Créer une nouvelle instance de Room
       const newRoom = new Room({
@@ -98,7 +98,7 @@ export async function addRoom(req, res) {
 
   export async function acceptRoomInvitation(req, res) {
     try {
-      const { roomid, recipient } = req.body;
+      const {roomid, recipient } = req.body;
   
       const roomExists = await Room.exists({ _id: roomid });
       const recipientExists = await User.exists({ _id: recipient });
@@ -115,13 +115,13 @@ export async function addRoom(req, res) {
         return res.status(404).json({ message: 'the user already added to the room' });
       }
   
-      // Update database with friend requests
       await Room.findByIdAndUpdate(roomid, {
         $push: { roomusers: recipient },
         $pull: { roomusersPending: recipient, Allroomusers: recipient }
     });
+
+    
   
-      // Notify recipient about the new invitation
       
   
       res.status(201).json({ message: 'Room Invitation accepted successfully' });
@@ -130,7 +130,7 @@ export async function addRoom(req, res) {
       res.status(500).json({ message: 'Internal server error' });
     }
   }
-
+  
 
   
   export async function adduserToRoom(req, res) {
@@ -146,16 +146,13 @@ export async function addRoom(req, res) {
   
       const Roomsender = await Room.findOne({ _id: roomid }); 
   
-      const roomverif = Roomsender.roomusersPending.includes(recipient);
-     
-      if (roomverif ) {
-        return res.status(404).json({ message: 'The invitation is already added' });
-      }
-  
-      // Update database with friend requests
+      
+        
       await Room.findByIdAndUpdate(roomid, { $push: { roomusers: recipient } });
+      await Room.findByIdAndUpdate(roomid, { $pull: { Allroomusers: recipient } });
+
+    
   
-      // Notify recipient about the new invitation
       
   
       res.status(201).json({ message: 'Invitation created successfully' });
@@ -165,6 +162,34 @@ export async function addRoom(req, res) {
     }
   }
 
+  export async function deleteuserfromRoom(req, res) {
+    try {
+      const { roomid, recipient } = req.body;
+  
+      const roomExists = await Room.exists({ _id: roomid });
+      const recipientExists = await User.exists({ _id: recipient });
+  
+      if (!roomExists || !recipientExists) {
+        return res.status(404).json({ message: 'room or recipient does not exist' });
+      }
+  
+      const Roomsender = await Room.findOne({ _id: roomid }); 
+  
+      
+        
+      await Room.findByIdAndUpdate(roomid, { $pull: { roomusers: recipient } });
+      await Room.findByIdAndUpdate(roomid, { $push: { Allroomusers: recipient } });
+
+    
+  
+      
+  
+      res.status(201).json({ message: 'Invitation created successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 
 
   export async function deleteRoomInvitation(req, res) {
@@ -348,6 +373,36 @@ export async function deleteChatAccess(req, res) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+export async function fetchRoomInvitationByUser(req, res) {
+  try {
+    const { Userid } = req.query; 
+
+    const userExists = await User.exists({ _id: Userid });
+    const RoomInvitation = [];
+
+    if (!userExists ) {
+      return res.status(404).json({ message: 'User or room does not exist' });
+    }
+    const rooms = await Room.find().select("-password");
+    if (rooms.length === 0) {
+      return res.status(400).json("No users found");
+    }
+    rooms.forEach(room => {
+      if(room.roomusersPending.some(user => user._id.toString() === Userid)) {
+        RoomInvitation.push(room);
+      }
+    });
+    
+    res.status(200).json(RoomInvitation);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
 
 export async function addOwnerAccess(req, res) {
   try {
