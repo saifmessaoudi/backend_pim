@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addRoomInvitation, deleteRoomInvitation, getAllRooms, addaUserAccess, deleteUserAccess, addChatAccess, deleteChatAccess, addOwnerAccess, deleteOwnerAccess, deleteRoom, getnotifcationtv, addRoomInvitationtv, addRoom, getroombyid,adduserToRoom,acceptRoomInvitation,fetchRoomInvitationByUser} from '../controllers/room.controller.js';
+import { addRoomInvitation, deleteRoomInvitation, getAllRooms, addaUserAccess, deleteUserAccess, addChatAccess, deleteChatAccess, addOwnerAccess, deleteOwnerAccess, deleteRoom, getnotifcationtv, addRoomInvitationtv, addRoom, getroombyid,adduserToRoom,acceptRoomInvitation,fetchRoomInvitationByUser,deleteuserfromRoom} from '../controllers/room.controller.js';
 
 
 const roomrouter = Router();
@@ -23,6 +23,8 @@ roomrouter.route('/acceptroominvitation')
 .patch(acceptRoomInvitation)
 roomrouter.route('/addUsertoRoom')
 .patch(adduserToRoom)
+roomrouter.route('/deleteuserfromroom')
+.patch(deleteuserfromRoom)
 
 roomrouter.route('/deleteroominvitation')
 .patch(deleteRoomInvitation)
