@@ -8,11 +8,6 @@ import mongoose from "mongoose"
 import { io } from "../server.js";
 import generateVerificationToken from '../controllers/generateVerificationToken.js';
 
-
-
-
-
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 
