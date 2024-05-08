@@ -24,11 +24,11 @@ const setupSocket = (io) =>{
             socket.broadcast.to(socket.roomId).emit('play');
         });
        
-        socket.on('addFlagPosition', (data) => {
-            console.log('addFlagPosition event received from user in room:', socket.roomId);
-            // Broadcast the received position to all users in the same room
-            socket.broadcast.to(socket.roomId).emit('addFlag', { 'position': data.position });
-          });
+       
+        socket.on('addFlag', (data) => {
+            console.log('flag event received from user in room: ', socket.roomId);
+            socket.broadcast.to(socket.roomId).emit ('addFlag', data);
+        });
           
       
         socket.on('pause', (data) => {
