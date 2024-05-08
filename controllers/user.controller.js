@@ -1224,7 +1224,7 @@ export const secuser = async (req, res) => {
 };
 export const savePoints = async (req, res) => {
   const { userId } = req.params;
-  const { points } = req.body;
+  const { points } = req.body;//body
 
   try {
     const user = await User.findById(userId);
@@ -1243,4 +1243,4 @@ export const savePoints = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
   }
-};
+};    
