@@ -60,16 +60,21 @@ const setupSocket = (io) =>{
   
       socket.on('Profile', (data) => {
         console.log("Received Profile", data); 
+        socket.on('newFriendRequest', (data) => {
+            socket.broadcast.emit('newFriendRequest', data);
+        });
+        socket.on('newRoomRequest', (data) => {
+            socket.broadcast.emit('newRoomRequest', data);
+        }); 
     });
+    
+   
+    
     
   
         socket.on('testEvent', (data) => {
             console.log('testEvent received');
-        }); 
-  
-         socket.on('newRoomRequest', (data) => {
-            console.log('newRoomRequest received');
-        }); 
+        });  
       
         socket.on('testNotification', (data) => {
             console.log('Received testNotification:', data);
