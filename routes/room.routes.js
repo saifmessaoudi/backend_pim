@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addRoomInvitation, deleteRoomInvitation, getAllRooms, addaUserAccess, deleteUserAccess, addChatAccess, deleteChatAccess, addOwnerAccess, deleteOwnerAccess, deleteRoom, getnotifcationtv, addRoomInvitationtv, addRoom, getroombyid,adduserToRoom,acceptRoomInvitation, getAllRoomsWithPrivate } from '../controllers/room.controller.js';
+import { addRoomInvitation, deleteRoomInvitation, getAllRooms, addaUserAccess, deleteUserAccess, addChatAccess, deleteChatAccess, addOwnerAccess, deleteOwnerAccess, deleteRoom, getnotifcationtv, addRoomInvitationtv, addRoom, getroombyid,adduserToRoom,acceptRoomInvitation,fetchRoomInvitationByUser,deleteuserfromRoom , addEmojiPositions} from '../controllers/room.controller.js';
 
 
 const roomrouter = Router();
@@ -23,15 +23,20 @@ roomrouter.route('/acceptroominvitation')
 .patch(acceptRoomInvitation)
 roomrouter.route('/addUsertoRoom')
 .patch(adduserToRoom)
+roomrouter.route('/deleteuserfromroom')
+.patch(deleteuserfromRoom)
 
 roomrouter.route('/deleteroominvitation')
 .patch(deleteRoomInvitation)
 
 
-roomrouter.route('/getAllRooms')
-.get(getAllRoomsWithPrivate)
+
 roomrouter.route('/getRooms')
 .get(getAllRooms)
+
+roomrouter.route('/fetchRoomInvitation')
+.get(fetchRoomInvitationByUser)
+
 roomrouter.route('/getroom/:roomId')
 .get(getroombyid)
 roomrouter.route('/getnotif/:userId')
@@ -53,7 +58,7 @@ roomrouter.route('/deleteChataccess')
 roomrouter.route('/deleteRoom')
 .delete(deleteRoom) 
 roomrouter.post('/join-room-tv', addRoomInvitationtv);
-
+roomrouter.post('/emoji/:roomId', addEmojiPositions);
 
 
 

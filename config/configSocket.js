@@ -1,9 +1,6 @@
 
 const setupSocket = (io) =>{
 
-
-    
-
     io.on('connection', (socket) => {
         console.log('connected');
       
@@ -26,6 +23,13 @@ const setupSocket = (io) =>{
             console.log('play event received from user in room: ', socket.roomId);
             socket.broadcast.to(socket.roomId).emit('play');
         });
+       
+       
+        socket.on('addFlag', (data) => {
+            console.log('flag event received from user in room: ', socket.roomId);
+            socket.broadcast.to(socket.roomId).emit ('addFlag', data);
+        });
+          
       
         socket.on('pause', (data) => {
             console.log('pause event received from user in room: ', socket.roomId);
@@ -56,16 +60,21 @@ const setupSocket = (io) =>{
   
       socket.on('Profile', (data) => {
         console.log("Received Profile", data); 
+        socket.on('newFriendRequest', (data) => {
+            socket.broadcast.emit('newFriendRequest', data);
+        });
+        socket.on('newRoomRequest', (data) => {
+            socket.broadcast.emit('newRoomRequest', data);
+        }); 
     });
+    
+   
+    
     
   
         socket.on('testEvent', (data) => {
             console.log('testEvent received');
-        }); 
-  
-         socket.on('newRoomRequest', (data) => {
-            console.log('newRoomRequest received');
-        }); 
+        });  
       
         socket.on('testNotification', (data) => {
             console.log('Received testNotification:', data);
