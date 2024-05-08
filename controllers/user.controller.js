@@ -4,15 +4,12 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/mailer.js";
 import { OAuth2Client } from "google-auth-library";
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 import { io } from "../server.js";
-import generateVerificationToken from '../controllers/generateVerificationToken.js';
-import { validationResult } from 'express-validator';
+import generateVerificationToken from "../controllers/generateVerificationToken.js";
+import { validationResult } from "express-validator";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-
-
 
 export const resetPassword = async (req, res) => {
   const { email, password, newPassword } = req.body;
@@ -33,7 +30,6 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 export const sendPasswordResetEmail = async (req, res) => {
   const { email } = req.body;
@@ -473,18 +469,17 @@ export async function acceptInvitation(req, res) {
 
 export const getGendersById = async (req, res) => {
   try {
-    const { sender } = req.params ; 
+    const { sender } = req.params;
 
-    const user = await User.findOne({ _id: sender }); 
+    const user = await User.findOne({ _id: sender });
 
     if (!user) {
-      return res.status(404).json({ message: 'User does not exist' });
+      return res.status(404).json({ message: "User does not exist" });
     }
 
     res.status(200).json({ favouriteGenders: user.favouriteGenders });
-
   } catch (error) {
-    res.status(500).json({ message: error.message }); 
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -589,26 +584,27 @@ export const getById = async (req, res) => {
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { username, firstName, lastName, birthDate, bio } = req.body;
-  
+
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(404).send(`No user with id: ${id}`);
-  
+
   const updatedUser = {
     username,
     firstName,
     lastName,
     birthDate,
-    bio
+    bio,
   };
 
   if (req.file) {
-    updatedUser.profilePicture = `${req.protocol}://${req.get("host")}/img/${req.file.filename}`;
+    updatedUser.profilePicture = `${req.protocol}://${req.get("host")}/img/${
+      req.file.filename
+    }`;
   }
 
   await User.findByIdAndUpdate(id, updatedUser, { new: true });
   res.json(updatedUser);
 };
-
 
 export const updatePassword = async (req, res) => {
   try {
@@ -652,7 +648,7 @@ export async function getAll(req, res) {
 
 export const getFriendsById = async (req, res) => {
   try {
-    const { sender } = req.params ; 
+    const { sender } = req.params;
 
     const user = await User.findOne({ _id: sender });
 
@@ -661,7 +657,6 @@ export const getFriendsById = async (req, res) => {
     }
 
     res.status(200).json({ friends: user.friends });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -674,33 +669,44 @@ export async function addInvitation(req, res) {
     const senderExists = await User.findOne({ _id: sender });
     const recipientExists = await User.findOne({ _id: recipient });
 
-        if (!senderExists || !recipientExists) {
-            return res.status(404).json({ message: 'Sender or recipient does not exist' });
-        }
-        const Usersender = await User.findOne({ _id: sender });
-        const Userrecipient = await User.findOne({ _id: recipient });
- 
-        
-
-           const senderverif = Usersender.friendRequestsSent.includes(recipient);
-           const recipientverif = Userrecipient.friendRequests.includes(sender);
-
-     
-        if ( senderverif || recipientverif || Usersender.friends.includes(recipient) || Userrecipient.friends.includes(sender)){
-            return res.status(404).json({ message: 'the invitation is already added' });
-        }
-
-        await User.updateOne({ _id: sender }, { $push: { friendRequestsSent: recipient } });
-
-        await User.updateOne({ _id: recipient }, { $push: { friendRequests: sender } });
-    
-        
-        io.emit('newFriendRequest', { sender, recipient });
-        res.status(201).json({ message: 'Invitation created successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (!senderExists || !recipientExists) {
+      return res
+        .status(404)
+        .json({ message: "Sender or recipient does not exist" });
     }
+    const Usersender = await User.findOne({ _id: sender });
+    const Userrecipient = await User.findOne({ _id: recipient });
+
+    const senderverif = Usersender.friendRequestsSent.includes(recipient);
+    const recipientverif = Userrecipient.friendRequests.includes(sender);
+
+    if (
+      senderverif ||
+      recipientverif ||
+      Usersender.friends.includes(recipient) ||
+      Userrecipient.friends.includes(sender)
+    ) {
+      return res
+        .status(404)
+        .json({ message: "the invitation is already added" });
+    }
+
+    await User.updateOne(
+      { _id: sender },
+      { $push: { friendRequestsSent: recipient } }
+    );
+
+    await User.updateOne(
+      { _id: recipient },
+      { $push: { friendRequests: sender } }
+    );
+
+    io.emit("newFriendRequest", { sender, recipient });
+    res.status(201).json({ message: "Invitation created successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
 export async function deleteInvitation(req, res) {
@@ -917,23 +923,25 @@ export const selectedroulette = async (req, res) => {
 
     // Check if the selected gift is provided in the request body
     if (!gift) {
-      return res.status(400).send('Selected gift is required');
+      return res.status(400).send("Selected gift is required");
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send("User not found");
     }
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     // Check if the user has played in the last 24 hours
     if (
-      (user.lastGiftSelectionDate && user.lastGiftSelectionDate > twentyFourHoursAgo) ||
-      (user.lastGiftReceivedDate && user.lastGiftReceivedDate > twentyFourHoursAgo)
+      (user.lastGiftSelectionDate &&
+        user.lastGiftSelectionDate > twentyFourHoursAgo) ||
+      (user.lastGiftReceivedDate &&
+        user.lastGiftReceivedDate > twentyFourHoursAgo)
     ) {
-      return res.status(400).send('You can only play once every 24 hours');
+      return res.status(400).send("You can only play once every 24 hours");
     }
 
     // Update the user's selected gift, lastGiftSelectionDate, and lastGiftReceivedDate
@@ -942,52 +950,51 @@ export const selectedroulette = async (req, res) => {
       lastGiftSelectionDate: new Date(),
       lastGiftReceivedDate: new Date(),
     });
- 
+
     await user.save();
 
     console.log(`Selected gift: ${gift} for User: ${userId}`);
-    res.status(200).send('Gift received successfully');
+    res.status(200).send("Gift received successfully");
   } catch (error) {
-    console.error('Error selecting gift:', error);
-    res.status(500).send('Internal Server Error');
+    console.error("Error selecting gift:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
 export const stastverifiedaccount = async (req, res) => {
-try {
-  const verifiedUsersCount = await  User.countDocuments({ isVerified: true });
-  const inverseUsersCount = await User.countDocuments({ isVerified: false });
-  res.json({verifiedUsersCount, inverseUsersCount });
-
-}catch (error) {
-  res.status(500).json({ error: error.message });
-}
+  try {
+    const verifiedUsersCount = await User.countDocuments({ isVerified: true });
+    const inverseUsersCount = await User.countDocuments({ isVerified: false });
+    res.json({ verifiedUsersCount, inverseUsersCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 export const findusersfriend = async (req, res) => {
   try {
     const { userId } = req.params;
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
+
     const friendIds = user.friends;
     const friends = [];
-    
+
     for (const friendId of friendIds) {
       const friend = await User.findById(friendId);
-      
+
       if (!friend) {
         console.error(`Friend with ID ${friendId} not found`);
         // Skip this friend and continue with the loop
         continue;
       }
-      
+
       friends.push(friend);
     }
     const nbrfriends = friends.length;
-    
-    res.status(200).json({friends, nbrfriends});
+
+    res.status(200).json({ friends, nbrfriends });
   } catch (error) {
     console.error("Error finding user's friends:", error);
     res.status(500).json({ error: error.message });
@@ -997,13 +1004,12 @@ export const findusersfriend = async (req, res) => {
 export const getuserbyusername = async (req, res) => {
   try {
     const username = req.params.username;
-    const user = await User.findOne ({ username });
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
     res.status(200).json(user);
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error finding user by username:", error);
     res.status(500).json({ error: error.message });
   }
@@ -1011,53 +1017,51 @@ export const getuserbyusername = async (req, res) => {
 export const findusersfriendbyusername = async (req, res) => {
   try {
     const username = req.params.username;
-    const user = await User.findOne ({ username });
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      const friendIds = user.friends;
-      const friends = [];
-      
-      for (const friendId of friendIds) {
-        const friend = await User.findById(friendId);
-        
-        if (!friend) {
-          console.error(`Friend with ID ${friendId} not found`);
-          // Skip this friend and continue with the loop
-          continue;
-        }
-        
-        friends.push(friend);
-      }
-      const nbrfriends = friends.length;
-      
-      res.status(200).json({friends, nbrfriends});
-    } catch (error) {
-      console.error("Error finding user's friends:", error);
-      res.status(500).json({ error: error.message });
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-  };
-  export const getGenreFilm = async (req, res) => {
-    try {
-        const { username } = req.params;
+    const friendIds = user.friends;
+    const friends = [];
 
-        // Assuming there's a 'User' model
-        const user = await User.findOne({ username });
+    for (const friendId of friendIds) {
+      const friend = await User.findById(friendId);
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+      if (!friend) {
+        console.error(`Friend with ID ${friendId} not found`);
+        // Skip this friend and continue with the loop
+        continue;
+      }
 
-        // Assuming there's a 'Film' model and the films are stored in a field like 'favoriteFilms' in the user schema
-        const films = await movie.find({ _id: { $in: user.favouriteMovies } });
-
-        return res.status(200).json({ films });
-    } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
+      friends.push(friend);
     }
+    const nbrfriends = friends.length;
+
+    res.status(200).json({ friends, nbrfriends });
+  } catch (error) {
+    console.error("Error finding user's friends:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
+export const getGenreFilm = async (req, res) => {
+  try {
+    const { username } = req.params;
 
+    // Assuming there's a 'User' model
+    const user = await User.findOne({ username });
 
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Assuming there's a 'Film' model and the films are stored in a field like 'favoriteFilms' in the user schema
+    const films = await movie.find({ _id: { $in: user.favouriteMovies } });
+
+    return res.status(200).json({ films });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 export const savelocation = async (req, res) => {
   try {
@@ -1070,8 +1074,7 @@ export const savelocation = async (req, res) => {
     user.location = { type: "Point", coordinates: [longitude, latitude] };
     await user.save();
     res.status(200).json({ message: "Location saved successfully" });
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error saving location:", error);
     res.status(500).json({ error: error.message });
   }
@@ -1084,7 +1087,7 @@ export const getlocation = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     res.status(200).json(user.location);
-  }catch (error) {
+  } catch (error) {
     console.error("Error getting location:", error);
     res.status(500).json({ error: error.message });
   }
@@ -1094,7 +1097,7 @@ export const getAllLocations = async (req, res) => {
     // Trouver tous les utilisateurs qui ont un champ 'location' défini
     const usersWithLocation = await User.find(
       { "location.coordinates": { $exists: true } }, // Trouver les utilisateurs avec des coordonnées
-      { location: 1,username: 1 } // Seules les locations sont nécessaires dans le résultat
+      { location: 1, username: 1 } // Seules les locations sont nécessaires dans le résultat
     );
 
     // Récupérer les locations
@@ -1110,99 +1113,134 @@ export const getAllLocations = async (req, res) => {
 };
 export const getAdmins = async (req, res) => {
   try {
-      // Rechercher tous les utilisateurs avec le rôle "admin"
-      const admins = await User.find({ role: 'admin' });
+    // Rechercher tous les utilisateurs avec le rôle "admin"
+    const admins = await User.find({ role: "admin" });
 
-      // Vérifier s'il y a des utilisateurs avec ce rôle
-      if (admins.length === 0) {
-          return res.status(404).json({ message: 'No admins found' });
-      }
+    // Vérifier s'il y a des utilisateurs avec ce rôle
+    if (admins.length === 0) {
+      return res.status(404).json({ message: "No admins found" });
+    }
 
-      // Retourner les utilisateurs avec le rôle "admin"
-      res.status(200).json(admins);
+    // Retourner les utilisateurs avec le rôle "admin"
+    res.status(200).json(admins);
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 export const addAdmin = async (req, res) => {
   try {
     const { username, password, email } = req.body;
 
-        const existingUser = await User.findOne({ username });
-        const existing = await User.findOne({ email });
+    const existingUser = await User.findOne({ username });
+    const existing = await User.findOne({ email });
 
-        if (existingUser && existing) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({
-            username: req.body.username,
-            email: req.body.email,
-            password: hashedPassword,
-            role : "admin"
-        });
-
-        const user = await newUser.save();
-
-        const authToken = jwt.sign(
-            { username: user.username, id: user._id },
-            process.env.JWT_KEY,
-            { expiresIn: "1h" }
-        );
-
-        const verificationToken = generateVerificationToken();
-        newUser.verificationToken = verificationToken;
-        await newUser.save();
-
-        const verificationLink = `${process.env.BASE_URL}/verify/${verificationToken}`;
-        const emailSubject = 'Email Verification';
-        const emailHtml = `Click the following link to verify your email: <a href="${verificationLink}">Verify Email</a>`;
-        await sendEmail(newUser.email, emailSubject, emailHtml);
-
-        res.status(200).json({ user: newUser, authToken, message: 'User registered successfully. Please check your email for verification.' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (existingUser && existing) {
+      return res.status(400).json({ message: "User already exists" });
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      username: req.body.username,
+      email: req.body.email,
+      password: hashedPassword,
+      role: "admin",
+    });
+
+    const user = await newUser.save();
+
+    const authToken = jwt.sign(
+      { username: user.username, id: user._id },
+      process.env.JWT_KEY,
+      { expiresIn: "1h" }
+    );
+
+    const verificationToken = generateVerificationToken();
+    newUser.verificationToken = verificationToken;
+    await newUser.save();
+
+    const verificationLink = `${process.env.BASE_URL}/verify/${verificationToken}`;
+    const emailSubject = "Email Verification";
+    const emailHtml = `Click the following link to verify your email: <a href="${verificationLink}">Verify Email</a>`;
+    await sendEmail(newUser.email, emailSubject, emailHtml);
+
+    res.status(200).json({
+      user: newUser,
+      authToken,
+      message:
+        "User registered successfully. Please check your email for verification.",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 export const secuser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-      const user = await User.findOne({ username });
+    const user = await User.findOne({ username });
 
-      if (!user) {
-          return res.status(401).json({ error: 'Invalid username or password' });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    if (user.lockUntil > Date.now()) {
+      const remainingTime = Math.ceil(
+        (user.lockUntil - Date.now()) / (60 * 1000)
+      );
+      return res.status(403).json({
+        error: `Account locked. Try again in ${remainingTime} minutes.`,
+      });
+    }
+
+    if (password === user.password) {
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { loginAttempts: 0, lockUntil: 0 } }
+      );
+
+      req.session.user = user;
+      return res.status(200).json({ message: "Login successful" });
+    } else {
+      await User.updateOne({ _id: user._id }, { $inc: { loginAttempts: 1 } });
+
+      if (user.loginAttempts + 1 >= 3) {
+        await User.updateOne(
+          { _id: user._id },
+          { $set: { lockUntil: Date.now() + 60 * 60 * 1000 } }
+        );
+        return res
+          .status(403)
+          .json({ error: "Account locked. Try again in 1 hour." });
       }
 
-      if (user.lockUntil > Date.now()) {
-          const remainingTime = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000)); 
-          return res.status(403).json({ error: `Account locked. Try again in ${remainingTime} minutes.` });
-      }
-
-      
-      if (password === user.password) {
-        
-          await User.updateOne({ _id: user._id }, { $set: { loginAttempts: 0, lockUntil: 0 } });
-
-          req.session.user = user;
-          return res.status(200).json({ message: 'Login successful' });
-      } else {
-          await User.updateOne({ _id: user._id }, { $inc: { loginAttempts: 1 } });
-
-          if (user.loginAttempts + 1 >= 3) {
-              await User.updateOne({ _id: user._id }, { $set: { lockUntil: Date.now() + 60 * 60 * 1000 } }); 
-              return res.status(403).json({ error: 'Account locked. Try again in 1 hour.' });
-          }
-
-          return res.status(401).json({ error: 'Invalid username or password' });
-      }
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
+export const savePoints = async (req, res) => {
+  const { userId } = req.params;
+  const { points } = req.body;
 
+  try {
+    const user = await User.findById(userId);
 
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update user's points by adding new points to the existing points
+    user.points += points;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ message: "Points saved successfully", totalPoints: user.points });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};

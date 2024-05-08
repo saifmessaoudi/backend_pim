@@ -32,6 +32,7 @@ const quizSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  
 });
 
 const Quiz = model("Quiz", quizSchema);
