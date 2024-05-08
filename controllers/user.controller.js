@@ -9,11 +9,6 @@ import { io } from "../server.js";
 import generateVerificationToken from '../controllers/generateVerificationToken.js';
 import { validationResult } from 'express-validator';
 
-
-
-
-
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 
