@@ -30,8 +30,7 @@ roomrouter.route('/deleteroominvitation')
 .patch(deleteRoomInvitation)
 
 
-roomrouter.route('/getAllRooms')
-.get(getAllRoomsWithPrivate)
+
 roomrouter.route('/getRooms')
 .get(getAllRooms)
 

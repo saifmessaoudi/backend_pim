@@ -1,9 +1,6 @@
 
 const setupSocket = (io) =>{
 
-
-    
-
     io.on('connection', (socket) => {
         console.log('connected');
       
@@ -26,6 +23,13 @@ const setupSocket = (io) =>{
             console.log('play event received from user in room: ', socket.roomId);
             socket.broadcast.to(socket.roomId).emit('play');
         });
+       
+        socket.on('addFlagPosition', (data) => {
+            console.log('addFlagPosition event received from user in room:', socket.roomId);
+            // Broadcast the received position to all users in the same room
+            socket.broadcast.to(socket.roomId).emit('addFlag', { 'position': data.position });
+          });
+          
       
         socket.on('pause', (data) => {
             console.log('pause event received from user in room: ', socket.roomId);
